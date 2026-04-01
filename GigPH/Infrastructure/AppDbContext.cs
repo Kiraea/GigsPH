@@ -20,7 +20,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser<Guid>,IdentityRole<Gu
         
     }
 
-    private DbSet<AppUser> AppUsers { get; set; }
-    private DbSet<BandUser> BandUsers{ get; set; }
-    private DbSet<Band> Band{ get; set; }
+    public DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<BandUser> BandUsers{ get; set; }
+    public DbSet<Band> Band{ get; set; }
 }

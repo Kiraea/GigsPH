@@ -26,9 +26,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Auth\" />
-      <Folder Include="Features\Band\" />
-      <Folder Include="Features\User\" />
+      <Folder Include="Features\Auth\Login\" />
+      <Folder Include="Features\Auth\Register\" />
+      <Folder Include="Features\Band\AddBandMember\" />
+      <Folder Include="Features\Band\CreateBand\" />
+      <Folder Include="Features\Band\DeleteBandMember\" />
+      <Folder Include="Features\Band\DeleteBand\" />
+      <Folder Include="Features\Band\UpdateBand\" />
+      <Folder Include="Features\User\UpdateProfile\" />
     </ItemGroup>
 
 </Project>

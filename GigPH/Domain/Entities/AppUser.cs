@@ -6,7 +6,10 @@ public class AppUser : IdentityUser<Guid>
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
+    public string Description { get; set; }
     public bool isVerified { get; set; } = false;
+    public bool isOnboarded { get; set; } = false;
 
     public ICollection<BandUser> BandUsers { get; set; }= [];
+    public ICollection<AppUserLink> AppUserLinks { get; set; } = [];
 }
