@@ -1,0 +1,6 @@
+@GigPH_HostAddress = http://localhost:5109
+
+GET {{GigPH_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

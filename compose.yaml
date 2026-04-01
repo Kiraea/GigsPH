@@ -1,0 +1,7 @@
+﻿services:
+  gigph:
+    image: gigph
+    build:
+      context: .
+      dockerfile: GigPH/Dockerfile
+
