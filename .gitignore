@@ -4,3 +4,33 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 .idea
+GigPH/Migrations/
+GigPH/appsettingsHidden.json
+../GigPH.sln.DotSettings.user
+*.sln.DotSettings.user
+
+
+# Nuxt dev/build outputs
+Frontend/.output
+Frontend/.data
+Frontend/.nuxt
+Frontend/.nitro
+Frontend/.cache
+Frontend/dist
+
+# Node dependencies
+Frontend/node_modules
+
+# Logs
+Frontend/logs
+Frontend/*.log
+
+# Misc
+.DS_Store
+.fleet
+Frontend/.idea
+
+# Local env files
+Frontend/.env
+Frontend/.env.*
+!Frontend/.env.example
