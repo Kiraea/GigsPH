@@ -9,12 +9,19 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Features\Auth\" />
+      <Folder Include="Features\Band\" />
+      <Folder Include="Features\User\" />
     </ItemGroup>
 
 </Project>
