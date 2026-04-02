@@ -4,9 +4,10 @@ namespace GigPH.Domain;
 
 public class AppUser : IdentityUser<Guid>
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Description { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? DisplayName { get; set; }
+    public string? Description { get; set; }
     public bool isVerified { get; set; } = false;
     public bool isOnboarded { get; set; } = false;
 

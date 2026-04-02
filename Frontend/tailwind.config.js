@@ -1,9 +1,15 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: [],
+module.exports = {
+  content: [
+    "./app/**/*.{js,vue,ts}",
+  ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        // This makes Poppins the default font for your whole app!
+        sans: ['Inter', 'sans-serif'],
+      }
+    },
   },
   plugins: [],
 }
-

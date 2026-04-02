@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2"/>
@@ -26,14 +28,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\Auth\Login\" />
-      <Folder Include="Features\Auth\Register\" />
       <Folder Include="Features\Band\AddBandMember\" />
       <Folder Include="Features\Band\CreateBand\" />
       <Folder Include="Features\Band\DeleteBandMember\" />
       <Folder Include="Features\Band\DeleteBand\" />
       <Folder Include="Features\Band\UpdateBand\" />
-      <Folder Include="Features\User\UpdateProfile\" />
     </ItemGroup>
 
 </Project>

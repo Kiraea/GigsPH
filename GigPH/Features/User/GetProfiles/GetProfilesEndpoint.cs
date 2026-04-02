@@ -8,20 +8,21 @@ namespace GigPH.Features.User.GetProfileById;
 public class GetProfilesEndpoint : ControllerBase
 {
 
-    public GetProfilesEndpoint()
+    private readonly GetProfileByIdHandler _handler;
+    public GetProfilesEndpoint(GetProfileByIdHandler handler)
     {
-        
+        _handler = handler;
     }
 
     [HttpGet("{userId:Guid}")]
-    public Task<ActionResult<GetProfileByIdResponse>> GetProfile(
+    public async Task<ActionResult<GetProfileByIdResponse>> GetProfile(
         [FromRoute] Guid userId,
         [FromQuery] bool includeSocialLinks = false)
     {
-        var profile = new (userId, includeSocialLinks);
+        var request = new GetProfileByIdRequest(userId, includeSocialLinks);
+        var profile = await _handler.HandleAsync(request);
 
         return profile;
-
     }
 
 

@@ -1,4 +1,5 @@
 using System.Text;
+using FluentValidation;
 using GigPH.Domain;
 using GigPH.Features.User.GetProfileById;
 using GigPH.Infrastructure;
@@ -14,6 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")));
+
+
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
 builder.Services.AddIdentityCore<AppUser>(options =>
         options.User.RequireUniqueEmail = true)
@@ -33,6 +38,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!));
 });
 
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddAuthorization();
 
@@ -43,6 +49,22 @@ builder.Configuration.AddJsonFile("appsettingsHidden.json");
 
 
 var app = builder.Build();
+
+
+
+using (var scoped = app.Services.CreateAsyncScope())
+{
+    var roleManager = scoped.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    List<string> roles = new List<string> { "User", "Admin", "Other" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole<Guid>(role));
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

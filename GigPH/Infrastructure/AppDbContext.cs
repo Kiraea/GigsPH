@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GigPH.Infrastructure;
 
-public class AppDbContext : IdentityDbContext<IdentityUser<Guid>,IdentityRole<Guid>, Guid>
+public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

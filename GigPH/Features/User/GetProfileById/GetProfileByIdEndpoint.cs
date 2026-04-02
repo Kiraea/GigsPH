@@ -5,6 +5,7 @@ namespace GigPH.Features.User.GetProfileById;
 
 
 [ApiController]
+[Route("/api/users")]
 public class GetProfileByIdEndpoint : ControllerBase
 {
     private readonly GetProfileByIdHandler _handler;
@@ -19,7 +20,7 @@ public class GetProfileByIdEndpoint : ControllerBase
         [FromQuery] bool includeSocialLinks = false)
     {
         var query = new GetProfileByIdRequest(userId, includeSocialLinks);
-        var profile = await _handler.HandleGetProfileByIdAsync(query);
+        var profile = await _handler.HandleAsync(query);
         return profile;
     }
     

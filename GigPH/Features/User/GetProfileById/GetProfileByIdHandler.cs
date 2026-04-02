@@ -13,7 +13,7 @@ public class GetProfileByIdHandler
         _dbContext= dbContext;
     }
 
-    public async Task<GetProfileByIdResponse?> HandleGetProfileByIdAsync(GetProfileByIdRequest request)
+    public async Task<GetProfileByIdResponse?> HandleAsync(GetProfileByIdRequest request)
     {
         IQueryable<AppUser> usersQuery = _dbContext.AppUsers.Where(u => u.Id == request.UserId);
 
