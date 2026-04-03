@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +13,12 @@ public class LoginEndpoint : ControllerBase
 
     private readonly LoginHandler _handler;
     private readonly IValidator<LoginRequest> _validator;
-    public LoginEndpoint(LoginHandler handler, IValidator<LoginRequest> validator)
+    private readonly IWebHostEnvironment _env;
+    public LoginEndpoint(LoginHandler handler, IValidator<LoginRequest> validator, IWebHostEnvironment env)
     {
         _handler = handler;
         _validator = validator;
+        _env = env;
     }
 
     [HttpPost("login")]
@@ -31,8 +34,9 @@ public class LoginEndpoint : ControllerBase
         var cookieOptions = new CookieOptions()
         {
             HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Strict
+            Secure = !_env.IsDevelopment(),
+            SameSite = _env.IsDevelopment() ? SameSiteMode.Strict : SameSiteMode.Lax
+           //TODO put domain next time
         };
         HttpContext.Response.Cookies.Append("AccessToken", response.AccessToken!, cookieOptions);
         return response;

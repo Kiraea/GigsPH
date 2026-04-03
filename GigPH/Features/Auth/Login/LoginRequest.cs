@@ -1,8 +1,8 @@
 namespace GigPH.Features.Auth.Login;
 
-public class LoginRequest
+public record LoginRequest
 {
-    public string? UsernameOrEmail{ get; set; }
-    public string? Password { get; set; }
+    public string? UsernameOrEmail{ get; init; }
+    public string? Password { get; init; }
     
 }

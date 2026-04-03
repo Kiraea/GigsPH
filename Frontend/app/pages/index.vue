@@ -1,7 +1,7 @@
 <script setup lang="ts">
 </script>
 <template>
-  <Section class="flex flex-row bg-[url('/mainBg.jpg')] bg-black/60 bg-blend-multiply bg-no-repeat bg-center bg-[length:100%_100%]">
+  <section class="flex flex-row bg-[url('/mainBg.jpg')] bg-black/60 bg-blend-multiply bg-no-repeat bg-center bg-[length:100%_100%]">
     <div class="flex-1 flex flex-col gap-10 p-10 text-white"   >
       <h1 class="text-9xl font-bold font-sans ">GigsPH</h1>
       <h2 class="text-6xl font-semibold">Is a platform where you can connect with different musicians around the Philippines.</h2>
@@ -16,7 +16,7 @@
       <div></div>
       <div></div>
     </div>
-  </Section>
+  </section>
   <section class="flex flex-row"> 
     <div class="flex-1 flex flex-col gap-10 p-10">
       <h1 class="text-6xl font-bold ">connect with others</h1>

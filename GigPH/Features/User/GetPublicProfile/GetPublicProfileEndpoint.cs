@@ -6,20 +6,20 @@ namespace GigPH.Features.User.GetProfileById;
 
 [ApiController]
 [Route("/api/users")]
-public class GetProfileByIdEndpoint : ControllerBase
+public class GetPublicProfileEndpoint : ControllerBase
 {
-    private readonly GetProfileByIdHandler _handler;
-    public GetProfileByIdEndpoint(GetProfileByIdHandler handler)
+    private readonly GetPublicProfileHandler _handler;
+    public GetPublicProfileEndpoint(GetPublicProfileHandler handler)
     {
         _handler = handler;
     }
 
     [HttpGet("{userId:Guid}")]
-    public async Task<ActionResult<GetProfileByIdResponse>> GetProfile(
+    public async Task<ActionResult<GetPublicProfileResponse>> GetProfile(
         [FromRoute] Guid userId,
         [FromQuery] bool includeSocialLinks = false)
     {
-        var query = new GetProfileByIdRequest(userId, includeSocialLinks);
+        var query = new GetPublicProfileRequest(userId, includeSocialLinks);
         var profile = await _handler.HandleAsync(query);
         return profile;
     }

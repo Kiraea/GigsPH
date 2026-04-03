@@ -46,6 +46,20 @@ builder.Services.AddOpenApi(options =>
         return Task.CompletedTask;
     });
 });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policyBuilder =>
+    {
+        policyBuilder.WithOrigins([builder.Configuration["AllowedOrigins"]!])
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .AllowAnyMethod();
+    });
+});
+
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")));
 
@@ -86,9 +100,11 @@ builder.Services.AddFluentValidationRulesToOpenApi();
 builder.Services.AddAuthorization();
 
 
-builder.Services.AddScoped<GetProfileByIdHandler>();
+builder.Services.AddScoped<GetPublicProfileHandler>();
 builder.Services.AddScoped <LoginHandler>();
 builder.Services.AddScoped <RegisterHandler>();
+builder.Services.AddScoped <GetMyProfileHandler>();
+
 
 
 builder.Configuration.AddJsonFile("appsettingsHidden.json");
@@ -142,11 +158,14 @@ using (var scoped = app.Services.CreateAsyncScope())
         }
     }
 }
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 
-app.UseHttpsRedirection();
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

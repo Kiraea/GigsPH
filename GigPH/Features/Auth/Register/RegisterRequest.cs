@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GigPH.Features.Auth.Register;
 
-public class RegisterRequest
+public record RegisterRequest
 {
-    public string? Email { get; set; }
-    public string? Password { get; set; }
+    public string? Email { get; init ; }
+    public string? Password { get; init; }
 }
