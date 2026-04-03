@@ -2,7 +2,7 @@ namespace GigPH.Features.Auth.Login;
 
 public class LoginRequest
 {
-    public string? Username{ get; set; }
+    public string? UsernameOrEmail{ get; set; }
     public string? Password { get; set; }
     
 }

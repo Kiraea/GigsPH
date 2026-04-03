@@ -18,6 +18,7 @@ public class LoginEndpoint : ControllerBase
         _validator = validator;
     }
 
+    [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         var validationResults = await  _validator.ValidateAsync(request);
@@ -26,6 +27,14 @@ public class LoginEndpoint : ControllerBase
             return ValidationProblem(validationResults.ToString());
         }
         var response = await _handler.HandleAsync(request);
+
+        var cookieOptions = new CookieOptions()
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Strict
+        };
+        HttpContext.Response.Cookies.Append("AccessToken", response.AccessToken!, cookieOptions);
         return response;
     }
     

@@ -10,9 +10,9 @@ public class RegisterHandler
     private readonly AppDbContext _dbContext;
     
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly RoleManager<AppUser> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly UserManager<AppUser> _userManager;
-    public RegisterHandler(AppDbContext dbcontext, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, RoleManager<AppUser> roleManager)
+    public RegisterHandler(AppDbContext dbcontext, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
     {
         _roleManager = roleManager;
         _signInManager = signInManager;
@@ -30,7 +30,7 @@ public class RegisterHandler
         var identityResult = await _userManager.CreateAsync(user, request.Password!);
         if (!identityResult.Succeeded)
         {
-            throw new Exception(string.Join(", ", identityResult.Errors));
+            throw new Exception(string.Join(", ", identityResult.Errors.Select(e => e.Description)));
         }
 
         var identityRoleResult = await _userManager.AddToRoleAsync(user, "User");

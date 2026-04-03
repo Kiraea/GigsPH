@@ -20,17 +20,16 @@
   <section class="flex flex-row"> 
     <div class="flex-1 flex flex-col gap-10 p-10">
       <h1 class="text-6xl font-bold ">connect with others</h1>
-      <h2 class="text-4xl font-semibold">meet new people through</h2>
+      <h2 class="text-4xl font-semibold">Discover new people through</h2>
       <div class="flex flex-row justify-around">
         <div class="flex flex-col w-1/4 items-center">
           <div class="w-full aspect-square bg-[url('/mainbg.jpg')] bg-[length:100%_100%]" ></div>
-          <div class="text-4xl  font-bold">Chats & Music</div>  
+          <div class="text-4xl  font-bold">profile & Music</div>  
         </div>
         <div class="flex flex-col w-1/4 items-center">
           <div class="w-full bg-[url('/mainbg.jpg')] aspect-square bg-[length:100%_100%]" ></div>
           <div class="text-4xl font-bold">Bands</div>
         </div>
-
       </div>
     </div>
   </section>

@@ -14,10 +14,10 @@ public class LoginHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly RoleManager<AppUser> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly UserManager<AppUser>  _userManager;
     private readonly IOptions<JwtOptions>  _options;
-    public LoginHandler(IOptions<JwtOptions> options, AppDbContext dbContext, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, RoleManager<AppUser> roleManager)
+    public LoginHandler(IOptions<JwtOptions> options, AppDbContext dbContext, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
     {
         _dbContext = dbContext;
         _signInManager = signInManager;
@@ -28,13 +28,13 @@ public class LoginHandler
 
     public async Task<LoginResponse> HandleAsync(LoginRequest request)
     {
-        var user = await  _userManager.FindByEmailAsync(request.Username);
+        var user = await  _userManager.FindByEmailAsync(request.UsernameOrEmail!);
         if (user == null)
         {
             throw new Exception("user not found");
         }
 
-        var signInResponse = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        var signInResponse = await _signInManager.CheckPasswordSignInAsync(user, request.Password!, false);
 
         if (!signInResponse.Succeeded)
         {
@@ -61,7 +61,7 @@ public class LoginHandler
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Value.SigningKey));
         
         // this is not signing the token this i sjust config
-        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.Sha256);
+        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         List<Claim> claims = 
         [
@@ -80,7 +80,10 @@ public class LoginHandler
         };
 
         var accessToken = new JsonWebTokenHandler().CreateToken(tokenDescription);
-
+        if (accessToken == null)
+        {
+            throw new Exception("access token not created due to reasons");
+        }
         return new LoginResponse()
         {
             UserId = user.Id,

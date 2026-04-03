@@ -8,11 +8,11 @@ public class RegisterValidator : AbstractValidator<RegisterRequest>
     public RegisterValidator()
     {
         RuleFor(r => r.Email)
-            .NotNull()
+            .NotEmpty()
             .EmailAddress();
 
         RuleFor(r => r.Password)
-            .NotNull()
+            .NotEmpty()
             .MinimumLength(2);
     }
 }
