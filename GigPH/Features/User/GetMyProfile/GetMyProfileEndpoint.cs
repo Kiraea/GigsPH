@@ -22,7 +22,7 @@ public class GetMyProfileEndpoint : ControllerBase
 
     [Authorize]
     [HttpGet("me")]
-    public async Task<ActionResult<GetMyProfileResponse>> GetProfile(
+    public async Task<ActionResult<GetMyProfileResponse>> GetMyProfile(
         [FromQuery] bool includeSocialLinks = false, [FromQuery] bool includeBands = false)
     {
         

@@ -22,5 +22,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<BandUser> BandUsers{ get; set; }
-    public DbSet<Band> Band{ get; set; }
+    public DbSet<Band> Bands{ get; set; }
+    public DbSet<Post> Posts{ get; set; }
+    public DbSet<Media> Medias{ get; set; }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json.Nodes;
 using FluentValidation;
@@ -13,6 +14,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text.Json.Nodes;
+using Amazon.S3;
+using Amazon.S3.Model;
+using GigPH.Features.Post.CreatePost;
+using GigPH.Features.Post.GetMyPosts;
+using GigPH.Infrastructure.Config;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,9 +70,23 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")));
 
-
-
+builder.Services.Configure<S3Options>(builder.Configuration.GetSection("S3"));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+builder.Services.AddSingleton<IAmazonS3>(o =>
+{
+    var opts = o.GetService<IOptions<S3Options>>()!.Value;
+    var config = new AmazonS3Config()
+    {
+        ServiceURL = opts.ServiceUrl,
+        ForcePathStyle = true,
+        UseHttp = true,
+    };
+    return new AmazonS3Client(opts.AccessKey, opts.SecretKey, config);
+});
+
+builder.Services.AddScoped<IS3Service, S3Service>();
+
 builder.Services.AddControllers();
 builder.Services.AddIdentityCore<AppUser>(options =>
         options.User.RequireUniqueEmail = true)
@@ -100,10 +121,14 @@ builder.Services.AddFluentValidationRulesToOpenApi();
 builder.Services.AddAuthorization();
 
 
-builder.Services.AddScoped<GetPublicProfileHandler>();
 builder.Services.AddScoped <LoginHandler>();
 builder.Services.AddScoped <RegisterHandler>();
+
+builder.Services.AddScoped<CreatePostHandler>();
+builder.Services.AddScoped<GetMyPostsHandler>();
+
 builder.Services.AddScoped <GetMyProfileHandler>();
+builder.Services.AddScoped<GetPublicProfileHandler>();
 
 
 
@@ -123,6 +148,40 @@ if (app.Environment.IsDevelopment())
         context.Database.Migrate();
     }
 
+    using (var scoped = app.Services.CreateAsyncScope())
+    {
+        var context = scoped.ServiceProvider.GetRequiredService<IAmazonS3>();
+        var bucketName = builder.Configuration["S3:BucketName"]!;
+
+        var buckets = await context.ListBucketsAsync();
+        var exists = buckets.Buckets?.Any(b => b.BucketName == bucketName) ?? false;
+        if (!exists)
+        {
+            await context.PutBucketAsync(bucketName);
+        }
+        else
+        {
+            // 2. Ask AWS for the list of files currently in the bucket
+            var listResponse = await context.ListObjectsV2Async(new ListObjectsV2Request 
+            { 
+                BucketName = bucketName 
+            });
+
+            // 3. Loop through and delete them one by one
+            if (listResponse.S3Objects != null)
+            {
+                foreach (var s3Obj in listResponse.S3Objects)
+                {
+                    await context.DeleteObjectAsync(bucketName, s3Obj.Key);
+                }    
+            }
+            
+        }
+        
+        
+    }
+
+    
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
