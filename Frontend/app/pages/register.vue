@@ -4,8 +4,8 @@
     layout: 'auth' 
   });
   
-  const Email = ref("");
-  const Password = ref("");
+  const email = ref("");
+  const password = ref("");
   const isLoading = ref(false);
   const error = ref<null|string>(null)
   
@@ -15,7 +15,7 @@
     try{
       const response = await $fetch("/api/auth/register", {
         method: 'POST',
-        body: {email: Email.value, password: Password.value},
+        body: {email: email.value, password: password.value},
       })
       await navigateTo("/login")
     }catch(e :any){
@@ -37,12 +37,12 @@
         <div class="flex flex-col">
           <label class="text-4xl ">Email
           </label>
-          <input v-model="Email" required  type="email" class="border-black border-2">
+          <input v-model="email" required  type="email" class="border-black border-2">
          
         </div>
         <div class="flex flex-col">
           <label class="text-4xl">Password</label>
-          <input  v-model="Password" required  type="password" class="border-black border-2">
+          <input  v-model="password" required  type="password" class="border-black border-2">
         </div>
         <button type="submit" :disabled="isLoading">Confirm</button>
       </form>
