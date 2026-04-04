@@ -11,21 +11,7 @@ export const useAuth = () => {
     
     const isLoggedIn = computed(()=> user.value !== null);
     
-    const checkSessionToken = async () => {
-        isLoading.value = true;
-        try{
-            const response = await $fetch<CheckTokenResponse>("/api/auth/check-token", {
-               credentials:'include', 
-            })
-            setUser(response.userId);
-        }catch(e:any){
-            console.log(e);
-            setUser(null);
-        }finally {
-            isLoading.value=false;
-        }
-    }
+
     
-    
-    return {user,setUser,checkSessionToken,isLoading,isLoggedIn}
+    return {user,setUser,isLoading,isLoggedIn}
 }

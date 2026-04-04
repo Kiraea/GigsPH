@@ -13,30 +13,35 @@
 
   interface LoginResponse {
     userId: string;
-    email?: string;
-    accessToken?: string;
+    email: string;
+    accessToken: string;
   }
   const handleLogin = async () => {
     try{
       const response: LoginResponse = await $fetch("/api/auth/login", {
         method:'POST',
-        body:{"email": email, "password": password}
+        body:{"usernameOrEmail": email.value, "password": password.value}
       })
       setUser(response.userId)
       navigateTo("/home");
     }catch(e:any){
       console.log(e.data?.detail);
+      console.log(e);
     }
   }
 </script>
 <template>
   <div class="bg-white">
-    <div>Login</div>
-    
-    <div>Email</div>
-    <input v-model="email"  type="email"></input>
+    <form @submit.prevent="handleLogin">
+      <div>Login</div>
 
-    <div>Password</div>
-    <input v-model="password"  type="password"></input>
+      <div>Email</div>
+      <input v-model="email"  type="email"></input>
+
+      <div>Password</div>
+      <input v-model="password"  type="password"></input>  
+      <button type="submit">Confirm</button>
+    </form>
+    
   </div>
 </template>

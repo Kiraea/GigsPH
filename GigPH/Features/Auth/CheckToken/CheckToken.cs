@@ -20,7 +20,7 @@ public class CheckTokenEndpoint :ControllerBase
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpGet]
     public async Task<ActionResult<CheckTokenResponse>> CheckToken()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
