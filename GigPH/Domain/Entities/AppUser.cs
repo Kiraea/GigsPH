@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Identity;
-
+using Microsoft.AspNetCore.Identity; 
 namespace GigPH.Domain;
 
 public class AppUser : IdentityUser<Guid>
@@ -8,8 +7,7 @@ public class AppUser : IdentityUser<Guid>
     public string? LastName { get; set; }
     public string? DisplayName { get; set; }
     public string? Description { get; set; }
-    public bool isVerified { get; set; } = false;
-    public bool isOnboarded { get; set; } = false;
+    public bool IsOnboarded { get; set; } = false;
 
     public ICollection<BandUser> BandUsers { get; set; }= [];
     public ICollection<AppUserLink> AppUserLinks { get; set; } = [];

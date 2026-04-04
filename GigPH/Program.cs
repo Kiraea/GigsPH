@@ -16,8 +16,10 @@ using Scalar.AspNetCore;
 using System.Text.Json.Nodes;
 using Amazon.S3;
 using Amazon.S3.Model;
+using GigPH.Features.Auth.CheckToken;
 using GigPH.Features.Post.CreatePost;
 using GigPH.Features.Post.GetMyPosts;
+using GigPH.Features.User.Onboard;
 using GigPH.Infrastructure.Config;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
@@ -123,6 +125,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped <LoginHandler>();
 builder.Services.AddScoped <RegisterHandler>();
+
+builder.Services.AddScoped<OnboardHandler>();
+builder.Services.AddScoped<CheckTokenHandler>();
 
 builder.Services.AddScoped<CreatePostHandler>();
 builder.Services.AddScoped<GetMyPostsHandler>();
