@@ -13,32 +13,38 @@ public class GetMyProfileHandler
         _dbContext= dbContext;
     }
 
-    public async Task<GetMyProfileResponse?> HandleAsync(GetMyProfileRequest request)
+    public async Task<GetMyProfileResponse> HandleAsync(GetMyProfileRequest request)
     {
 
         var user = await _dbContext.AppUsers.Where(au => au.Id == request.UserId)
-            .Select(au => new GetMyProfileResponse()
-            {
-                Id = au.Id,
-                FirstName = au.FirstName,
-                LastName = au.LastName,
-                Description = au.Description,
-                SocialLinks = request.IncludeSocialLinks
-                    ? au.AppUserLinks.Select(aul => new SocialLinkResponse { SocialLinkId = aul.Id, Url = aul.Url })
-                        .ToList()
-                    : new List<SocialLinkResponse>(),
-                BandResponses = request.IncludeBands
-                    ? au.BandUsers.Select(aub => new BandResponse
-                        { BandId = aub.BandId, Description = aub.Band.description, Title = aub.Band.title }).ToList()
-                    : new List<BandResponse>()
-            }).FirstOrDefaultAsync();
+            .Include(au => au.AppUserLinks)
+            .Include(au => au.BandUsers).ThenInclude(bandUser => bandUser.Band)
+            .FirstOrDefaultAsync();
+        if (user == null)
+        {
+            throw new Exception("user does not exist");
+        }
+        
+        var userResponse = new GetMyProfileResponse
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Description = user.Description,
+            SocialLinks = request.IncludeSocialLinks
+                ? user.AppUserLinks.Select(aul => new SocialLinkResponse { SocialLinkId = aul.Id, Url = aul.Url }).ToList()
+                : new List<SocialLinkResponse>(),
+            BandResponses = request.IncludeBands
+                ? user.BandUsers.Select(aub => new BandResponse { BandId = aub.BandId, Description = aub.Band.description, Title = aub.Band.title }).ToList()
+                : new List<BandResponse>()
+        };;
 
 
             
-        if (user == null)
+        if (userResponse == null)
             throw new Exception("User not found");
 
-        return user;
+        return userResponse;
     }
     
 }

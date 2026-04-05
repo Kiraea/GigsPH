@@ -16,8 +16,27 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
         builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
         base.OnModelCreating(builder);
-        
-        
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        var entities = ChangeTracker.Entries<IBaseEntity>()
+            .Where(e => e.State is EntityState.Modified or EntityState.Added);
+
+        foreach (var entity in entities)
+        {
+            if (entity.State is EntityState.Modified)
+            {
+                entity.Entity.ModifiedAt = DateTime.UtcNow;
+            }
+
+            if (entity.State is EntityState.Added)
+            {
+                entity.Entity.CreatedAt = DateTime.UtcNow;
+                entity.Entity.ModifiedAt= DateTime.UtcNow;
+            }
+        }
+        return base.SaveChangesAsync(cancellationToken);
     }
 
     public DbSet<AppUser> AppUsers { get; set; }

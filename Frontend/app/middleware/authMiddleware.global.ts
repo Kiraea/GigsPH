@@ -1,15 +1,18 @@
 import {useAuth} from "~/composables/useAuth";
 import {useUser} from "~/composables/useUser";
 
-export default defineNuxtRouteMiddleware(async (to,from)=> {
+const publicRoutes: string[] = ["/", "/landing"];
+
+const authRoutes: string[] = ["/login", "/register"];
+
+//outside cause uknow 
+export default defineNuxtRouteMiddleware((to,from)=> {
     const {isLoggedIn} = useAuth();
     const {profile} = useUser();
     console.log("hit hit hit hit")
-    const publicRoutes: string[] = ["/", "/landing"];
     
     const isPublicRoute = publicRoutes.includes(to.path)
     
-    const authRoutes: string[] = ["/login", "/register"];
 
     const isAuthRoutes = authRoutes.includes(to.path);
     

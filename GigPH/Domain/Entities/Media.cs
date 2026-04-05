@@ -1,6 +1,6 @@
 namespace GigPH.Domain;
 
-public class Media
+public class Media : BaseEntity
 {
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }

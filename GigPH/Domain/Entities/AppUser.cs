@@ -11,4 +11,5 @@ public class AppUser : IdentityUser<Guid>
 
     public ICollection<BandUser> BandUsers { get; set; }= [];
     public ICollection<AppUserLink> AppUserLinks { get; set; } = [];
+    public ICollection<Post> Posts { get; set; } = [];
 }

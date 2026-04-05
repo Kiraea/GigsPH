@@ -1,6 +1,6 @@
 namespace GigPH.Domain;
 
-public class AppUserLink
+public class AppUserLink : BaseEntity
 {
     public Guid Id { get; set; } 
     public Guid AppUserId { get; set; } 

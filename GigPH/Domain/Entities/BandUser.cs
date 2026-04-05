@@ -1,6 +1,6 @@
 namespace GigPH.Domain;
 
-public class BandUser
+public class BandUser : BaseEntity
 {
     public Guid AppUserId { get; set; }
     public Guid BandId { get; set; }
