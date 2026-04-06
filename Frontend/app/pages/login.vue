@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
   import {useAuth} from "~/composables/useAuth";
+  import {useErrorHandler} from "~/composables/useErrorHandler";
 
   definePageMeta({
     layout: 'auth' 
@@ -10,6 +11,7 @@
   const isLoading = ref("");
   const error = ref<null | string>();
   const {user, setUser} = useAuth();
+  const {setErrors}= useErrorHandler()
 
   interface LoginResponse {
     userId: string;
@@ -27,6 +29,7 @@
     }catch(e:any){
       console.log(e.data?.detail);
       console.log(e);
+      setErrors(e);
     }
   }
 </script>

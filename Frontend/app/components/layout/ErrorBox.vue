@@ -8,7 +8,7 @@
 
 <template>
   
-<div v-if="errors" class="bg-black">
+<div v-if="errors" class="bg-white text-black fixed top-0 right-0">
   <div v-for="error in errors" :key="error.id">
     {{error.message}}
   </div>

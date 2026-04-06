@@ -5,12 +5,18 @@ console.log("API_URL:", process.env.API_URL)
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/fonts'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxt/fonts', '@nuxt/icon'],
   routeRules: {
     "/api/**" : {
       proxy: process.env.API_URL + '/api/**'
     }
   },
+  css:['~/assets/reset.css'],
+  icon: {
+    mode: 'css',
+    cssLayer: 'base',
+    localApiEndpoint: '/_nuxt_icon', // moves it away from /api/
+  }
 
 
 

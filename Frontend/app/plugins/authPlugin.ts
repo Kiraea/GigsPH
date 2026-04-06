@@ -18,7 +18,7 @@ export default defineNuxtPlugin(async () => {
         setUser(data.value.userId)
         setProfile({
             isOnboarded:data.value.isOnboarded,
-            DisplayName:data.value.displayName
+            displayName:data.value.displayName
         })
         
     } else {

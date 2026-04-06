@@ -27,12 +27,12 @@ export default defineNuxtRouteMiddleware((to,from)=> {
     if (isLoggedIn.value){
         
         if (isAuthRoutes){
-            return navigateTo("/")
+            return navigateTo("/home")
         }
         
         if (profile.value?.isOnboarded){
             if (to.path === "/onboarding"){
-                return navigateTo("/")
+                return navigateTo("/home")
             }
             return
         }else{

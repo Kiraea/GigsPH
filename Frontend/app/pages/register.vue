@@ -8,7 +8,7 @@
   const password = ref("");
   const isLoading = ref(false);
   const error = ref<null|string>(null)
-  
+  const {setErrors} = useErrorHandler();
   const handleRegister= async () => {
     isLoading.value = true;
     
@@ -21,6 +21,8 @@
     }catch(e :any){
       console.log(e.data?.detail);
       error.value = e.data?.detail;
+      setErrors(e);
+      
     }finally{
       isLoading.value=false
     }

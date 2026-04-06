@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+
+
 definePageMeta({
   layout:"auth"
 })
@@ -17,6 +20,9 @@ const handleOnboard = async () => {
   await onboard(obj)
   navigateTo("/home")
 }
+
+
+
 </script>
 
 <template>
