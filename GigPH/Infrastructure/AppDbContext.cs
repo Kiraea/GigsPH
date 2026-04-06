@@ -40,8 +40,10 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     }
 
     public DbSet<AppUser> AppUsers { get; set; }
-    public DbSet<BandUser> BandUsers{ get; set; }
+    public DbSet<Genre> Genres{ get; set; }
+    public DbSet<Instrument> Instruments{ get; set; }
     public DbSet<Band> Bands{ get; set; }
     public DbSet<Post> Posts{ get; set; }
+    public DbSet<SocialLink> SocialLinks{ get; set; }
     public DbSet<Media> Medias{ get; set; }
 }

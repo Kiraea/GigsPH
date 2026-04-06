@@ -30,10 +30,10 @@
   
 </script>
 <template>
-  <div class="flex bg-white flex-row  rounded-2xl w-[80%] h-[60vh]">
+  <div class="flex bg-white flex-row  rounded-2xl w-[80%] h-[60vh] shadow-md">
     <div class="flex flex-col gap-y-10 py-10 px-20 flex-1">
       
-      <h1 class="text-9xl font-bold self-center">Register</h1>
+      <h1 class="text-7xl font-bold self-center self-center">Register</h1>
 
       <form class="flex flex-col gap-5" @submit.prevent="handleRegister">
         <div class="flex flex-col">
@@ -46,7 +46,9 @@
           <label class="text-4xl">Password</label>
           <input  v-model="password" required  type="password" class="border-black border-2">
         </div>
-        <button type="submit" :disabled="isLoading">Confirm</button>
+        <div>
+          <button type="submit" :disabled="isLoading" class="" >Confirm</button>
+        </div>
       </form>
       <div v-if="error">{{error}}</div>
     </div>

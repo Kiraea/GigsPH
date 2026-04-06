@@ -8,8 +8,10 @@ public record GetMyProfileResponse
     public string? FirstName { get; init; }
     public string? LastName { get; init; }
     public string? Description { get; init; }
-    public List<SocialLinkResponse>? SocialLinks { get; init; } = [];
-    public List<BandResponse>? BandResponses { get; init; } = [];
+    public List<SocialLinkResponse> SocialLinks { get; init; } = [];
+    public List<BandResponse> Bands{ get; init; } = [];
+    public List<GenreResponse> Genres{ get; init; } = [];
+    public List<InstrumentResponse> Instruments{ get; init; } = [];
 
 }
     

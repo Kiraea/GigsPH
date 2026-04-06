@@ -1,17 +1,22 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-
-console.log("API_URL:", process.env.API_URL)
+import tailwindcss from "@tailwindcss/vite";
+//console.log("API_URL:", process.env.API_URL)
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/fonts', '@nuxt/icon'],
+  modules: [ '@nuxt/fonts', '@nuxt/icon'],
   routeRules: {
     "/api/**" : {
       proxy: process.env.API_URL + '/api/**'
     }
   },
-  css:['~/assets/reset.css'],
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
+  },
+  css:['./app/assets/reset.css', './app/assets/css/main.css'],
   icon: {
     mode: 'css',
     cssLayer: 'base',

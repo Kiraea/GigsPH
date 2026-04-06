@@ -23,18 +23,19 @@ public class GetMyProfileEndpoint : ControllerBase
     [Authorize]
     [HttpGet("me")]
     public async Task<ActionResult<GetMyProfileResponse>> GetMyProfile(
-        [FromQuery] bool includeSocialLinks = false, [FromQuery] bool includeBands = false)
+        [FromQuery] GetMyProfileRequest request)
     {
         
         // the jwtregister.sub thingy automaps to claimtypes.nameidentified for some reason thats why we check that one
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-
+        if (!Guid.TryParse(userId, out var result))
+        {
+            return Unauthorized();
+        }
         var query = new GetMyProfileRequest()
         {
-            UserId = userId,
-            IncludeSocialLinks = includeSocialLinks,
-            IncludeBands= includeBands,
+            UserId = result,
         };
 
         var validation = await _validator.ValidateAsync(query);

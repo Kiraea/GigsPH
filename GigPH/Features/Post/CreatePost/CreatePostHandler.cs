@@ -22,22 +22,23 @@ public class CreatePostHandler
         if (request.File != null)
         {
             var ext = Path.GetExtension(request.File.FileName);
-            var key =  $"Post/{request.UserId}/{Guid.CreateVersion7()}/ext";
-            var stream = request.File.OpenReadStream();
-
-            var response = await _s3.UploadAsync(stream, key, request.File.ContentType);
+            
             media = new Media
             {
                 FileSize = request.File.Length,
-                Id = Guid.CreateVersion7(),
-                Key = key,
                 Name = request.File.FileName,
                 OwnerId = request.UserId,
                 OwnerType = OwnerType.Post,
                 Type = request.File.ContentType
             };
+            
+            // u can do this cause it only vlaidates when u do save changes async so safe
+            var key =  $"Post/{request.UserId}/{media.Id}/ext";
+            media.Key = key;
+            var stream = request.File.OpenReadStream();
 
-            _dbContext.Medias.Add(media);
+            var response = await _s3.UploadAsync(stream, key, request.File.ContentType);
+             _dbContext.Medias.Add(media);
         }
 
         var post = new Domain.Post

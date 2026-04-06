@@ -28,11 +28,11 @@ const handleOnboard = async () => {
 <template>
   <div class="">
     <form @submit.prevent="handleOnboard">
-      <div>
+      <div class="flex flex-row">
         <label>Display Name</label>
         <input v-model="displayName"  required type="text">
-      </div>
-      <div>
+      </div >
+      <div class="flex flex-row">
         <label>First Name</label>
         <input v-model="firstName" required type="text">
       </div>
@@ -40,7 +40,7 @@ const handleOnboard = async () => {
         <label>Last Name</label>
         <input v-model="lastName" required type="text">
       </div>
-      <div>
+      <div class="flex flex-row">
         <label>Description Name</label>
         <input v-model="description" required type="text">
       </div>    

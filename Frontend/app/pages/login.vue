@@ -34,16 +34,23 @@
   }
 </script>
 <template>
-  <div class="bg-white">
-    <form @submit.prevent="handleLogin">
+  <div class="bg-white rounded-lg shadow-sm">
+    <form @submit.prevent="handleLogin" class="flex flex-col p-5 gap-5  ">
       <div>Login</div>
-
-      <div>Email</div>
-      <input v-model="email"  type="email"></input>
-
-      <div>Password</div>
-      <input v-model="password"  type="password"></input>  
+    
+      <div class="flex flex-col">
+        <div>Email</div>
+        <input v-model="email"  type="email" ></input>  
+      </div>
+      
+      <div class="flex flex-col">
+        <div>Password</div>
+        <input v-model="password"  type="password"></input>  
+      </div>
+      
       <button type="submit">Confirm</button>
+      
+      <div class="">Dont have an Account yet?<nuxtLink to="/register" class="font-bold text-lg"><button>Register</button></nuxtLink></div>
     </form>
     
   </div>

@@ -25,7 +25,6 @@ public class OnboardEndpoint : ControllerBase
     public async Task<ActionResult<OnboardResponse>> Onboard([FromBody] OnboardRequest request)
     {
         
-        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userId, out var result))
         {

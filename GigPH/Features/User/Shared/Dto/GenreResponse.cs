@@ -1,6 +1,8 @@
 namespace GigPH.Features.User.Shared.Dto;
 
-public class GenreResponse
+public record GenreResponse
 {
     
+    public Guid Id { get; init; } 
+    public string Name { get; init; }
 }

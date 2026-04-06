@@ -9,7 +9,10 @@ public class AppUser : IdentityUser<Guid>
     public string? Description { get; set; }
     public bool IsOnboarded { get; set; } = false;
 
-    public ICollection<BandUser> BandUsers { get; set; }= [];
-    public ICollection<AppUserLink> AppUserLinks { get; set; } = [];
+    public ICollection<Band> Bands { get; set; }= [];
+    public ICollection<SocialLink> SocialLinks { get; set; } = [];
     public ICollection<Post> Posts { get; set; } = [];
+    public ICollection<Genre> Genres { get; set; } = [];
+    public ICollection<Instrument> Instruments{ get; set; } = [];
+    
 }

@@ -22,6 +22,7 @@ using GigPH.Features.Post.GetMyPosts;
 using GigPH.Features.Post.GetPublicPosts;
 using GigPH.Features.User.Onboard;
 using GigPH.Infrastructure.Config;
+using GigPH.Infrastructure.Seeds;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
 
@@ -209,7 +210,13 @@ if (app.Environment.IsDevelopment())
 }
 
 
+using (var scoped = app.Services.CreateAsyncScope())
+{
+    var dbContext = scoped.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    await DatabaseSeeder.SeedGenresAsync(dbContext);
+    await DatabaseSeeder.SeedInstruments(dbContext);
+}
 
 using (var scoped = app.Services.CreateAsyncScope())
 {

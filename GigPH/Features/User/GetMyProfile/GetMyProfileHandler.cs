@@ -15,34 +15,54 @@ public class GetMyProfileHandler
 
     public async Task<GetMyProfileResponse> HandleAsync(GetMyProfileRequest request)
     {
+        // as no trakcing since we dont really change aynthing we get straightup
+        var userQuery = _dbContext.AppUsers.AsNoTracking().Where(au => au.Id == request.UserId);
+        if (request.IncludeBands)
+        {
+            userQuery = userQuery.Include(au => au.Bands);
+        }
 
-        var user = await _dbContext.AppUsers.Where(au => au.Id == request.UserId)
-            .Include(au => au.AppUserLinks)
-            .Include(au => au.BandUsers).ThenInclude(bandUser => bandUser.Band)
-            .FirstOrDefaultAsync();
+        if (request.IncludeGenres)
+        {
+            
+            userQuery = userQuery.Include(au => au.Genres);
+        }
+
+        if (request.IncludeInstruments)
+        {
+            
+            userQuery = userQuery.Include(au => au.Instruments);
+        }
+
+        if (request.IncludeSocialLinks)
+        {
+            userQuery = userQuery.Include(au => au.SocialLinks);
+        }
+        var user = await userQuery.FirstOrDefaultAsync();
+        
         if (user == null)
         {
             throw new Exception("user does not exist");
         }
-        
+
         var userResponse = new GetMyProfileResponse
         {
             Id = user.Id,
             FirstName = user.FirstName,
             LastName = user.LastName,
             Description = user.Description,
-            SocialLinks = request.IncludeSocialLinks
-                ? user.AppUserLinks.Select(aul => new SocialLinkResponse { SocialLinkId = aul.Id, Url = aul.Url }).ToList()
-                : new List<SocialLinkResponse>(),
-            BandResponses = request.IncludeBands
-                ? user.BandUsers.Select(aub => new BandResponse { BandId = aub.BandId, Description = aub.Band.description, Title = aub.Band.title }).ToList()
-                : new List<BandResponse>()
-        };;
-
-
-            
-        if (userResponse == null)
-            throw new Exception("User not found");
+            SocialLinks = user.SocialLinks
+                              ?.Select(aul => new SocialLinkResponse { Id = aul.Id, Url = aul.Url }).ToList()
+                          ?? [],
+            Bands = user.Bands?.Select(aub => new BandResponse
+                        { Id = aub.Id, Description = aub.Description, Title = aub.Title }).ToList()
+                    ?? [],
+            Genres = user.Genres?.Select(aug => new GenreResponse { Id = aug.Id, Name = aug.Name }).ToList()
+                     ?? [],
+            Instruments = user.Instruments?.Select(aui => new InstrumentResponse { Id = aui.Id, Name = aui.Name })
+                              .ToList()
+                          ?? []
+        };
 
         return userResponse;
     }

@@ -65,7 +65,8 @@ public class S3Service : IS3Service
         {
             BucketName = _options.Value.BucketName,
             Key = key,
-            Expires = new DateTime().AddMinutes(expiryMinutes)
+            Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+            Protocol = Protocol.HTTP
         });
         
         

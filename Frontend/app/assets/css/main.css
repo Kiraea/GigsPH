@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@layer base {
+    input[type='text'],
+    input[type='password'],
+    input[type='email']
+    {
+        @apply border-black border-2 
+    }
+    
+    button{
+        @apply text-white bg-black rounded-4xl p-2 text-9xl
+    }
+}

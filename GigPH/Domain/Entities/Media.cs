@@ -2,7 +2,7 @@ namespace GigPH.Domain;
 
 public class Media : BaseEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid OwnerId { get; set; }
     public OwnerType OwnerType { get; set; } 
     
