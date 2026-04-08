@@ -1,4 +1,3 @@
-import {postUtil} from "~/utils/postUtil";
 import {useErrorHandler} from "~/composables/useErrorHandler";
 import {refreshNuxtData} from "nuxt/app";
 
@@ -50,6 +49,10 @@ export interface UpdatePostResponse{
     fileName? : string | null,
 }
 
+export interface DeletePostRequest{
+    postId: string,
+}
+
 
 export const usePosts = () => {
     
@@ -69,7 +72,7 @@ export const usePosts = () => {
             if(payload.file){
                 formData.append("file", payload.file)
             }
-            const response = $fetch<GetPublicPostsResponse>("/api/posts", {
+            const response = await $fetch<GetPublicPostsResponse>("/api/posts", {
                 method:'POST',
                 body:formData,
                 credentials: 'include'
@@ -96,7 +99,7 @@ export const usePosts = () => {
             if (payload.file) formData.append("file", payload.file)
              formData.append("removeMedia", String(payload.removeMedia))
             
-            const response = await $fetch("/api/posts", {
+            const response = await $fetch(`/api/posts/${payload.postId}`, {
                 method:'PATCH',
                 body: formData,
                 credentials: 'include'
@@ -105,6 +108,23 @@ export const usePosts = () => {
         }catch(e){
             setErrors(e)
             throw e
+        }finally {
+            isMutating.value = false
+        }
+    }
+    
+    const deletePost = async (payload : DeletePostRequest) => {
+        isMutating.value = true
+        try{
+            const response = await $fetch(`/api/posts/${payload.postId}`,{
+                method:'DELETE',
+                credentials:'include'
+            });
+        }catch(e){
+            setErrors(e)
+            throw e 
+        }finally {
+            isMutating.value = false
         }
     }
     

@@ -22,7 +22,7 @@ public class DeletePostEndpoint: ControllerBase
     [Authorize]
     [HttpDelete("{postId:guid}")]
     public async Task<ActionResult<DeletePostResponse>> DeletePost(
-         [FromRoute] DeletePostRequest request)
+         [FromRoute] DeletePostRequest request, [FromRoute] Guid postId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userId, out var result))
@@ -31,6 +31,7 @@ public class DeletePostEndpoint: ControllerBase
         }
 
         request.UserId = result;
+        request.PostId= postId;
         
 
         var response = await _handler.HandleAsync(request);

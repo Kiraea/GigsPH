@@ -23,9 +23,9 @@ public class UpdatePostEndpoint: ControllerBase
     }
 
     [Authorize]
-    [HttpPut]
+    [HttpPatch("{postId:guid}")]
     public async Task<ActionResult<UpdatePostResponse>> CreatePost(
-        [FromForm] UpdatePostRequest request)
+        [FromForm] UpdatePostRequest request, [FromRoute] Guid postId)
     {
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,6 +35,7 @@ public class UpdatePostEndpoint: ControllerBase
         }
 
         request.UserId = result;
+        request.PostId = postId;
         
         var validationResponse = await _validator.ValidateAsync(request);
         if (!validationResponse.IsValid)

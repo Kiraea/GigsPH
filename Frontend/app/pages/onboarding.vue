@@ -31,7 +31,7 @@ const error = ref<string | null>(null)
 
 const {onboard} = useUser()
 const handleOnboard = async () => {
-  const obj: OnboardResponse = {
+  const obj: OnboardRequest = {
     displayName: displayName.value,
     firstName: firstName.value,
     lastName:lastName.value,
@@ -132,7 +132,7 @@ watch(selectedState, async (newState) => {
       <div v-else class="flex flex-col gap-5">
         
         <select v-model="selectedCountry">
-          gray-200<option value="">Select Country</option>
+          <option value="">Select Country</option>
           <option v-for="c in countries" :key="c.iso2" :value="c.iso2">
             {{ c.name }}
           </option>

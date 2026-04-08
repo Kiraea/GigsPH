@@ -55,9 +55,8 @@ export interface OnboardResponse{
     firstName: string,
     lastName: string,
     description: string,
-    location: LocationResponse 
-
-    genres: GenreResponse[] | null
+    location: LocationResponse,
+    genres: GenreResponse[] | null,
     instruments: InstrumentResponse [] | null , 
     socialLinks: SocialLinkResponse[] | null,
 }
@@ -92,6 +91,7 @@ export const useUser = () => {
             await fetchFullProfile();
         } catch (e) {
             setErrors(e);
+            throw(e);
         } finally {
             isMutating.value = false;
         }
@@ -109,6 +109,7 @@ export const useUser = () => {
             await fetchFullProfile();
         } catch (e) {
             setErrors(e);
+            throw(e);
         } finally {
             isMutating.value = false;
         }
