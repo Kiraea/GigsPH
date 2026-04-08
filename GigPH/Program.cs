@@ -18,8 +18,10 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using GigPH.Features.Auth.CheckToken;
 using GigPH.Features.Post.CreatePost;
-using GigPH.Features.Post.GetMyPosts;
+using GigPH.Features.Post.GetPublicPost;
 using GigPH.Features.Post.GetPublicPosts;
+using GigPH.Features.Post.UpdatePost;
+using GigPH.Features.User.GetMyProfile;
 using GigPH.Features.User.Onboard;
 using GigPH.Infrastructure.Config;
 using GigPH.Infrastructure.Seeds;
@@ -132,8 +134,9 @@ builder.Services.AddScoped<OnboardHandler>();
 builder.Services.AddScoped<CheckTokenHandler>();
 
 builder.Services.AddScoped<CreatePostHandler>();
-builder.Services.AddScoped<GetMyPostsHandler>();
+builder.Services.AddScoped<UpdatePostHandler>();
 builder.Services.AddScoped<GetPublicPostsHandler>();
+builder.Services.AddScoped<GetPublicPostHandler>();
 
 builder.Services.AddScoped <GetMyProfileHandler>();
 builder.Services.AddScoped<GetPublicProfileHandler>();

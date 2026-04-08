@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace GigPH.Features.User.GetProfileById;
+namespace GigPH.Features.User.GetMyProfile;
 
 
 [ApiController]
@@ -33,18 +33,16 @@ public class GetMyProfileEndpoint : ControllerBase
         {
             return Unauthorized();
         }
-        var query = new GetMyProfileRequest()
-        {
-            UserId = result,
-        };
 
-        var validation = await _validator.ValidateAsync(query);
+        request.UserId = result;
+
+        var validation = await _validator.ValidateAsync(request);
         if (!validation.IsValid)
         {
             return ValidationProblem(validation.ToString());
         }
 
-        var profile = await _handler.HandleAsync(query);
+        var profile = await _handler.HandleAsync(request);
         return profile!;
     }
 }

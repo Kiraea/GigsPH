@@ -17,9 +17,10 @@ public class OnboardHandler
     public async Task<OnboardResponse> HandleAsync(OnboardRequest request)
     {
         var user = await _dbContext.AppUsers.Where((au) => au.Id == request.UserId)
-            .Include(au => au.Bands)
             .Include(au => au.Instruments)
-            .Include(au => au.SocialLinks).FirstOrDefaultAsync();
+            .Include(au => au.SocialLinks)
+            .Include(au => au.Genres)
+            .Include(au => au.Location).FirstOrDefaultAsync();
 
         
         
@@ -28,15 +29,32 @@ public class OnboardHandler
             throw new Exception("user cannot be found");
         }
 
+        if (user.IsOnboarded)
+            throw new Exception("user already onboarded");
+        
         user.DisplayName = request.DisplayName!;
         user.Description= request.Description!;
         user.FirstName= request.FirstName!;
         user.LastName= request.LastName!;
-        user.IsOnboarded= true;
+
+
+        var location = await _dbContext.Locations.FirstOrDefaultAsync(l =>
+            l.Country == request.Country && l.City == request.City && l.ProvinceState == request.ProvinceState);
+
+        if (location == null)
+        {
+            location = new Location
+                { City = request.City!, Country = request.Country!, ProvinceState = request.ProvinceState! };
+            await _dbContext.AddAsync(location);
+        }
+
+        user.Location = location;
+        
+        
 
         if (request.GenreIds.Count > 0)
         {
-            var genres = await _dbContext.Genres.Where(g => request.InstrumentIds.Contains(g.Id)).ToListAsync();
+            var genres = await _dbContext.Genres.Where(g => request.GenreIds.Contains(g.Id)).ToListAsync();
             user.Genres = genres;
         }
 
@@ -55,6 +73,8 @@ public class OnboardHandler
             }
         }
 
+        
+        user.IsOnboarded= true;
         //_dbContext.Update(user);
         // if ur fetching the user technically no need to like do this
 
@@ -68,6 +88,7 @@ public class OnboardHandler
             Genres = user.Genres?.Select((g) => new GenreResponse(){Id=g.Id,Name = g.Name}).ToList() ?? [],
             Instruments = user.Instruments?.Select((i) => new InstrumentResponse{Id=i.Id,Name = i.Name}).ToList() ?? [],
             SocialLinks= user.SocialLinks?.Select((sl) => new SocialLinkResponse{Id=sl.Id, Url = sl.Url}).ToList() ?? [],
+            Location = new LocationResponse{City = user.Location.City, Country = user.Location.Country, Id = user.Location.Id, ProvinceState = user.Location.ProvinceState}
         };
     }
 }

@@ -46,4 +46,5 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Post> Posts{ get; set; }
     public DbSet<SocialLink> SocialLinks{ get; set; }
     public DbSet<Media> Medias{ get; set; }
+    public DbSet<Location> Locations{ get; set; }
 }

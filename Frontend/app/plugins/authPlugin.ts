@@ -8,20 +8,13 @@ interface checkToken {
 }
 export default defineNuxtPlugin(async () => {
     const { setUser } = useAuth()
-    const {setProfile }= useUser()
 
     const { data, error } = await useFetch<checkToken>('/api/auth/check-token', {
         headers: useRequestHeaders(['cookie']) as HeadersInit,
     })
-
     if (data.value) {
-        setUser(data.value.userId)
-        setProfile({
-            isOnboarded:data.value.isOnboarded,
-            displayName:data.value.displayName
-        })
-        
+        setUser(data.value.userId, data.value.isOnboarded);
     } else {
-        
+        setUser(null)
     }
 })

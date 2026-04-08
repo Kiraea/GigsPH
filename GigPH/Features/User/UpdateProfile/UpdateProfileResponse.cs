@@ -9,6 +9,7 @@ public record UpdateProfileResponse
     public List<BandResponse> Bands{ get; init; } = [];
     public List<GenreResponse> Genres{ get; init; } = [];
     public List<InstrumentResponse> Instruments{ get; init; } = [];
+    public LocationResponse Location { get; init; } 
  
 }
    

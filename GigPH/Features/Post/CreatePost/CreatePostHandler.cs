@@ -33,7 +33,7 @@ public class CreatePostHandler
             };
             
             // u can do this cause it only vlaidates when u do save changes async so safe
-            var key =  $"Post/{request.UserId}/{media.Id}/ext";
+            var key =  $"Post/{request.UserId}/{media.Id}/{ext}";
             media.Key = key;
             var stream = request.File.OpenReadStream();
 

@@ -12,16 +12,25 @@ export default defineNuxtConfig({
     }
   },
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+      ],
+      exclude: [
+        '@countrystatecity/countries',
+      ],
+    },
   },
   css:['./app/assets/reset.css', './app/assets/css/main.css'],
   icon: {
     mode: 'css',
     cssLayer: 'base',
     localApiEndpoint: '/_nuxt_icon', // moves it away from /api/
-  }
+  },
+
+
 
 
 

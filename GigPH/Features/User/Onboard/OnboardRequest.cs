@@ -14,6 +14,10 @@ public record OnboardRequest
     public List<Guid> InstrumentIds { get; init; } = [];
 
     public List<SocialLinkRequest> SocialLinks { get; init; } = [];
+    
+    public string? Country { get; init; }
+    public string? City { get; init; }
+    public string? ProvinceState { get; init; }
 
 
 

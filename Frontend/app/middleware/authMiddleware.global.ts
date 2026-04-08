@@ -7,8 +7,7 @@ const authRoutes: string[] = ["/login", "/register"];
 
 //outside cause uknow 
 export default defineNuxtRouteMiddleware((to,from)=> {
-    const {isLoggedIn} = useAuth();
-    const {profile} = useUser();
+    const {isLoggedIn,user } = useAuth();
     console.log("hit hit hit hit")
     
     const isPublicRoute = publicRoutes.includes(to.path)
@@ -29,8 +28,7 @@ export default defineNuxtRouteMiddleware((to,from)=> {
         if (isAuthRoutes){
             return navigateTo("/home")
         }
-        
-        if (profile.value?.isOnboarded){
+        if (user.value?.isOnboarded){
             if (to.path === "/onboarding"){
                 return navigateTo("/home")
             }

@@ -15,4 +15,8 @@ public class AppUser : IdentityUser<Guid>
     public ICollection<Genre> Genres { get; set; } = [];
     public ICollection<Instrument> Instruments{ get; set; } = [];
     
+    public Guid? LocationId { get; set; }
+    public Location Location { get; set; }
+    
+    
 }

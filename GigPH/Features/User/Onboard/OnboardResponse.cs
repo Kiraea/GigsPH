@@ -12,4 +12,5 @@ public record OnboardResponse
     public List<GenreResponse> Genres { get; init; } = [];
     public List<InstrumentResponse> Instruments { get; init; } = [];
     public List<SocialLinkResponse> SocialLinks { get; init; } = [];
+    public LocationResponse Location { get; init; }
 }
