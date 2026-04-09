@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using FluentValidation;
-using GigPH.Features.User.GetProfileById;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GigPH.Features.User.UpdateProfile;
@@ -19,15 +18,14 @@ public class UpdateProfileEndpoint : ControllerBase
     }
 
     [HttpPatch("me")]
-    public async Task<ActionResult<UpdateProfileResponse>> UpdateProfile([FromBody] UpdateProfileRequest request)
+    public async Task<ActionResult<UpdateProfileResponse>> UpdateProfile( [FromBody] UpdateProfileRequest request)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (Guid.TryParse(userId, out var result))
+        var result = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (Guid.TryParse(result, out var requesterUserId))
         {
             return Unauthorized();
         }
 
-        request.UserId = result;
 
         var validationResponse = await _validator.ValidateAsync(request);
         if (!validationResponse.IsValid)
@@ -35,7 +33,7 @@ public class UpdateProfileEndpoint : ControllerBase
             return ValidationProblem(validationResponse.ToString());
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(requesterUserId, request);
 
         return response;
 

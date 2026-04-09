@@ -5,7 +5,6 @@ using FluentValidation;
 using GigPH.Domain;
 using GigPH.Features.Auth.Login;
 using GigPH.Features.Auth.Register;
-using GigPH.Features.User.GetProfileById;
 using GigPH.Infrastructure;
 using MicroElements.AspNetCore.OpenApi.FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,7 +20,7 @@ using GigPH.Features.Post.CreatePost;
 using GigPH.Features.Post.GetPublicPost;
 using GigPH.Features.Post.GetPublicPosts;
 using GigPH.Features.Post.UpdatePost;
-using GigPH.Features.User.GetMyProfile;
+using GigPH.Features.User.GetPublicProfile;
 using GigPH.Features.User.Onboard;
 using GigPH.Infrastructure.Config;
 using GigPH.Infrastructure.Seeds;
@@ -138,7 +137,6 @@ builder.Services.AddScoped<UpdatePostHandler>();
 builder.Services.AddScoped<GetPublicPostsHandler>();
 builder.Services.AddScoped<GetPublicPostHandler>();
 
-builder.Services.AddScoped <GetMyProfileHandler>();
 builder.Services.AddScoped<GetPublicProfileHandler>();
 
 

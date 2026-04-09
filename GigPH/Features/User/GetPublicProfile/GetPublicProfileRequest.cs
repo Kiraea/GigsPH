@@ -1,3 +1,6 @@
-namespace GigPH.Features.User.GetProfileById;
+namespace GigPH.Features.User.GetPublicProfile;
 
-public record GetPublicProfileRequest(Guid UserId, bool IncludeSocialLinks = false);
+public record GetPublicProfileRequest
+{
+    public Guid UserId { get; set; }
+};

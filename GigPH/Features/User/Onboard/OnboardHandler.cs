@@ -14,9 +14,9 @@ public class OnboardHandler
     }
 
 
-    public async Task<OnboardResponse> HandleAsync(OnboardRequest request)
+    public async Task<OnboardResponse> HandleAsync(Guid requesterUserId, OnboardRequest request)
     {
-        var user = await _dbContext.AppUsers.Where((au) => au.Id == request.UserId)
+        var user = await _dbContext.AppUsers.Where((au) => au.Id == requesterUserId)
             .Include(au => au.Instruments)
             .Include(au => au.SocialLinks)
             .Include(au => au.Genres)

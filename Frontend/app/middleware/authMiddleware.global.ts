@@ -1,50 +1,50 @@
-import {useAuth} from "~/composables/useAuth";
-import {useUser} from "~/composables/useUser";
+import { useAuth } from "~/composables/useAuth";
 
-const publicRoutes: string[] = ["/", "/landing"];
+// Only these EXACT pages are public
+const publicRouteNames: string[] = ["index", "landing", "profile-id"];
 
-const authRoutes: string[] = ["/login", "/register"];
+// Only these EXACT pages are for guests (people not logged in)
+const authRouteNames: string[] = ["login", "register"];
 
-//outside cause uknow 
-export default defineNuxtRouteMiddleware((to,from)=> {
-    const {isLoggedIn,user } = useAuth();
-    console.log("hit hit hit hit")
-    
-    const isPublicRoute = publicRoutes.includes(to.path)
-    
+export default defineNuxtRouteMiddleware((to, from) => {
+    const { isLoggedIn, user } = useAuth();
 
-    const isAuthRoutes = authRoutes.includes(to.path);
-    
+    // Cast to string safely
+    const routeName = String(to.name);
 
-    if (!isLoggedIn.value){
-        if (!isPublicRoute && !isAuthRoutes){
+    const isPublicRoute = publicRouteNames.includes(routeName);
+    const isAuthRoute = authRouteNames.includes(routeName);
+    console.log(isLoggedIn.value)
+    console.log(user.value?.isOnboarded)
+    // 1. If NOT logged in
+    if (!isLoggedIn.value) {
+        if (!isPublicRoute && !isAuthRoute) {
             return navigateTo("/login");
-        }else{
-            return
         }
+        return; // Let them pass
     }
-    if (isLoggedIn.value){
-        
-        if (isAuthRoutes){
-            return navigateTo("/home")
+
+    // 2. If LOGGED in
+    if (isLoggedIn.value) {
+        if (isAuthRoute) {
+            return navigateTo("/home");
         }
-        if (user.value?.isOnboarded){
-            if (to.path === "/onboarding"){
-                return navigateTo("/home")
+        /*
+        if (routeName === "profile-id" && to.params.id === user.value?.id){
+            return navigateTo("/profile/me");
+        }
+        */
+        // Onboarding logic
+        if (user.value?.isOnboarded) {
+            if (to.path === "/onboarding") {
+                return navigateTo("/home");
             }
-            return
-        }else{
-            if(to.path !== "/onboarding"){
+            return;
+        } else {
+            if (to.path !== "/onboarding") {
                 return navigateTo("/onboarding");
             }
-            return
+            return;
         }
-        
     }
-    
-    
-
-    
-    
-    
 });

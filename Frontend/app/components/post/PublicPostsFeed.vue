@@ -2,21 +2,22 @@
 
 import PublicPostCard from "~/components/post/PublicPostCard.vue";
 import {FetchError} from 'ofetch';
-defineProps<{
+const props = defineProps<{
   posts: GetPublicPostsResponse[] | null | undefined
   postsPending: boolean,
   isMutating: boolean,
   postsError: FetchError | null | undefined
 }>()
+
+watchEffect(() => props.posts?.map((a)=> console.log(a.id)))
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-y-10">
+  <div class="flex flex-col items-center gap-y-10 h-full w-full bg-gray-100">
     <div v-if="postsPending">...Loading </div>
     
-    
     <template v-else-if="posts && posts.length > 0" >
-      <PublicPostCard v-for="post in posts"  :post="post" :key="post.Id"/>
+      <PublicPostCard v-for="post in posts"  :post="post" :key="post.id"/>
     </template>
     
     

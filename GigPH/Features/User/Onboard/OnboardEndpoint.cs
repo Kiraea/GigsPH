@@ -24,14 +24,12 @@ public class OnboardEndpoint : ControllerBase
     [HttpPut("onboard")]
     public async Task<ActionResult<OnboardResponse>> Onboard([FromBody] OnboardRequest request)
     {
-        
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userId, out var result))
+        var result = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(result , out var requesterUserId))
         {
             return Unauthorized();
         }
 
-        request.UserId = result;
 
         var validation = await _validator.ValidateAsync(request);
         if (!validation.IsValid)
@@ -39,7 +37,7 @@ public class OnboardEndpoint : ControllerBase
             return ValidationProblem(validation.ToString());
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(requesterUserId, request);
 
         return response;
 

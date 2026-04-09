@@ -13,9 +13,9 @@ public class UpdateProfileHandler
         _dbContext= dbContext;
     }
 
-    public async Task<UpdateProfileResponse> HandleAsync(UpdateProfileRequest request)
+    public async Task<UpdateProfileResponse> HandleAsync(Guid requesterUserId, UpdateProfileRequest request)
     {
-        var user = await _dbContext.AppUsers.Where(au => au.Id == request.UserId)
+        var user = await _dbContext.AppUsers.Where(au => au.Id == requesterUserId)
             .Include(au => au.Instruments)
             .Include(au => au.Genres)
             .Include(au => au.Location)

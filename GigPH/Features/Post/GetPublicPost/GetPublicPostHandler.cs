@@ -13,10 +13,10 @@ public class GetPublicPostHandler
         _s3 = s3;
 
     }
-    public async Task<GetPublicPostResponse> HandleAsync(GetPublicPostRequest request)
+    public async Task<GetPublicPostResponse> HandleAsync(Guid postId)
     {
         var post = await _dbContext.Posts.Include(post => post.Media)
-            .Include(p => p.User).FirstOrDefaultAsync(p => p.Id == request.PostId);
+            .Include(p => p.User).FirstOrDefaultAsync(p => p.Id == postId);
 
         if (post == null)
         {

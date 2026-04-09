@@ -28,22 +28,19 @@ public class UpdatePostEndpoint: ControllerBase
         [FromForm] UpdatePostRequest request, [FromRoute] Guid postId)
     {
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userId, out var result))
+        var result = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(result, out var requesterUserId))
         {
             return Unauthorized();
         }
 
-        request.UserId = result;
-        request.PostId = postId;
-        
         var validationResponse = await _validator.ValidateAsync(request);
         if (!validationResponse.IsValid)
         {
             return ValidationProblem(validationResponse.ToString());
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(requesterUserId, postId, request);
         return response;
     }
 

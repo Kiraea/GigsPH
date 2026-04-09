@@ -14,9 +14,9 @@ public class DeletePostHandler
     }
 
 
-    public async Task<DeletePostResponse> HandleAsync(DeletePostRequest request)
+    public async Task<DeletePostResponse> HandleAsync(Guid requesterUserId, Guid postId)
     {
-        var post = await _dbContext.Posts.Where(p => p.Id == request.PostId && p.UserId == request.UserId)
+        var post = await _dbContext.Posts.Where(p => p.Id == postId && p.UserId == requesterUserId)
             .Include(p => p.Media).FirstOrDefaultAsync();
 
         if (post == null)

@@ -16,15 +16,15 @@ public class GetPublicPostEndpoint: ControllerBase
     }
 
     [HttpGet("{postId :guid}")]
-    public async Task<ActionResult<GetPublicPostResponse>> GetPublicPost(GetPublicPostRequest request)
+    public async Task<ActionResult<GetPublicPostResponse>> GetPublicPost([FromRoute] Guid postId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userId, out var result))
+        var result = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(result, out var requesterUserId))
         {
             return Unauthorized();
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(postId);
         return response;
     }
 

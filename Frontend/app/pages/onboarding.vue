@@ -29,7 +29,7 @@ const isLoading = ref(true)
 const error = ref<string | null>(null)
 
 
-const {onboard} = useUser()
+const {onboard} = useProfileMutations()
 const handleOnboard = async () => {
   const obj: OnboardRequest = {
     displayName: displayName.value,
@@ -63,7 +63,7 @@ onMounted(async () => {
   }
 })
 
-watch(selectedCountry, async (newCountry) => {
+  watch(selectedCountry, async (newCountry) => {
   console.log('1. Country changed to:', newCountry) // See if the click registered
 
   selectedState.value = ''

@@ -16,7 +16,7 @@ public class CreatePostHandler
         _s3 = s3;
     }
 
-    public async Task<CreatePostResponse> HandleAsync(CreatePostRequest request)
+    public async Task<CreatePostResponse> HandleAsync(Guid requesterUserId, CreatePostRequest request)
     {
         Media? media = null;
         if (request.File != null)
@@ -27,13 +27,13 @@ public class CreatePostHandler
             {
                 FileSize = request.File.Length,
                 Name = request.File.FileName,
-                OwnerId = request.UserId,
+                OwnerId = requesterUserId,
                 OwnerType = OwnerType.Post,
                 Type = request.File.ContentType
             };
             
             // u can do this cause it only vlaidates when u do save changes async so safe
-            var key =  $"Post/{request.UserId}/{media.Id}/{ext}";
+            var key =  $"Post/{requesterUserId}/{media.Id}/{ext}";
             media.Key = key;
             var stream = request.File.OpenReadStream();
 
@@ -44,7 +44,7 @@ public class CreatePostHandler
         var post = new Domain.Post
         {
             Description = request.Description!,
-            UserId = request.UserId,
+            UserId = requesterUserId,
             MediaId = media?.Id,
             Title = request.Title!,
             Id = Guid.CreateVersion7()
@@ -60,7 +60,7 @@ public class CreatePostHandler
             Id = post.Id,
             MediaType = media?.Type,
             Title = request.Title!,
-            UserId = request.UserId
+            UserId =requesterUserId 
         };
     }
     

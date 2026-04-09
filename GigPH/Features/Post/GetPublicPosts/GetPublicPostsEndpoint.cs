@@ -20,7 +20,6 @@ public class GetPublicPostsEndpoint : ControllerBase
     public async Task<ActionResult<List<GetPublicPostsResponse>>> GetPublicPosts()
     {
         var response = await _handler.HandleAsync();
-
         return response;
     }
 }

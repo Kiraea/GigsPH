@@ -1,20 +1,41 @@
 <script setup lang="ts">
 
+
+import {formatDate} from "~/utils/helperUtils";
+import UpdatePostForm from "~/components/post/UpdatePostForm.vue";
 defineProps<{
   post: GetPublicPostsResponse
 }>()
-import {formatDate} from "~/utils/helperUtils";
+
+
+
+const isOpen = ref(false);
+
+
 </script>
 
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col gap-y-2 w-[40%]">
 
+
+
+
+    <div>
+      <button @click="isOpen= true" >Update Post</button>
+      <Teleport to="body">
+        <div v-if="isOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <UpdatePostForm :post="post" @close="isOpen = false"/>
+        </div>
+      </Teleport>
+    </div>
+    
+    
     <!-- Header: avatar + name + title -->
     <div class="flex flex-col px-5">
       <div class="flex items-center gap-3">
         <div>
           <div class="flex flex-row items-center gap-5">
-            <div class="w-12 h-12 rounded-full bg-red-500 text-lg text-black font-bold items-center flex justify-center">{{post.displayName.charAt(0)}}</div>
+            <NuxtLink :to="`/profile/${post.userId}`" class="w-12 h-12 rounded-full bg-red-500 text-lg text-black font-bold items-center flex justify-center">{{post.displayName.charAt(0)}}</NuxtLink>
             <div class="font-semibold text-gray-900 text-md">{{ post.displayName }}</div>
           </div>
           <div class="text-xs text-gray-400">{{formatDate(post.createdAt)}}</div>
@@ -46,7 +67,3 @@ import {formatDate} from "~/utils/helperUtils";
 
   </div>
 </template>
-
-<style scoped>
-
-</style>

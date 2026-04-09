@@ -1,17 +1,33 @@
 import { useErrorHandler } from "~/composables/useErrorHandler";
+import {useFetch} from "nuxt/app";
 
 // Extended fields are nullable/empty because user may not have added them yet
-export interface UserProfile {
+
+export interface  GetPublicProfileResponse{
+
     // Core required fields – backend will reject null/blank values
-    displayName: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    description: string | null;
-    location: LocationResponse | null;
+    Id: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    description?: string | null;
+    location?: LocationResponse | null;
     // Extended fields – can be null or empty arrays until user adds them
     socialLinks: SocialLinkResponse[] | null;
     genres: GenreResponse[] | null;
     instruments: InstrumentResponse[] | null;
+}
+export interface UpdateProfileRequest{
+
+    // Core required fields – backend will reject null/blank values
+    description?: string | null;
+    // Extended fields – can be null or empty arrays until user adds them
+    socialLinks: string[] | null;
+    genresIds: string[] | null;
+    instrumentsIds: string[] | null;
+    country: string;
+    city: string;
+    provinceState: string;
 }
 
 export interface GenreResponse {
@@ -61,59 +77,67 @@ export interface OnboardResponse{
     socialLinks: SocialLinkResponse[] | null,
 }
 
-export const useUser = () => {
-    const profile = useState<UserProfile | null>('user-profile', () => null);
-    const { setErrors } = useErrorHandler();
-    const isMutating = ref(false);
 
-    const fetchFullProfile = async () => {
-        try {
-            const data = await $fetch<UserProfile>('/api/users/profile', {
-                credentials:'include',
-            });
-            profile.value = data;
-        } catch (e) {
-            setErrors(e);
-            throw e;
-        }
-    };
+
+export const useProfileMutations = () => {
+    const { setErrors } = useErrorHandler();
+    const { user } = useAuth();
+    const isMutating = ref(false);
 
     const onboard = async (payload: OnboardRequest) => {
         isMutating.value = true;
         try {
-            const response = await $fetch<OnboardResponse>("/api/users/onboard", {
+            await $fetch<OnboardResponse>('/api/users/onboard', {
                 method: 'PUT',
                 body: payload,
-                credentials: 'include'
-                }
-            )
-            // After onboarding, fetch full profile (extended fields will be null/empty)
-            await fetchFullProfile();
-        } catch (e) {
-            setErrors(e);
-            throw(e);
-        } finally {
-            isMutating.value = false;
-        }
-    };
-
-    const updateProfile = async (updatedProfile: UserProfile) => {
-        isMutating.value = true;
-        try {
-            await $fetch('/api/users/profile', {
-                method: 'PUT',
-                body: updatedProfile,
                 credentials: 'include',
             });
-            // Refetch to get server‑validated version (avoids manual assignment)
-            await fetchFullProfile();
+            if (user.value){
+                user.value.isOnboarded = true
+            }
+            await refreshNuxtData(`user-${user.value?.id}`);
         } catch (e) {
             setErrors(e);
-            throw(e);
+            throw e;
         } finally {
             isMutating.value = false;
         }
     };
 
-    return { profile, onboard, fetchFullProfile, updateProfile, isMutating };
+    const updateProfile = async (payload: UpdateProfileRequest) => {
+        isMutating.value = true;
+        try {
+            await $fetch('/api/users/me', {
+                method: 'PATCH',
+                body: payload,
+                credentials: 'include',
+            });
+            await refreshNuxtData(`user-${user.value?.id}`);
+        } catch (e) {
+            setErrors(e);
+            throw e;
+        } finally {
+            isMutating.value = false;
+        }
+    };
+
+    return { onboard, updateProfile, isMutating };
+};
+
+
+export const useUser = (userId: string) => {
+    const { setErrors } = useErrorHandler();
+    const { data: pubUser, pending: pubUserPending, error: pubUserError } = useFetch<GetPublicProfileResponse>(
+        `/api/users/${userId}`,
+        {
+            key: `user-${userId}`,
+            onResponseError({ response }) {
+                console.log(response);
+                if (import.meta.client) {
+                    setErrors(response._data);
+                }
+            }
+        }
+    );
+    return { pubUser, pubUserPending, pubUserError };
 };

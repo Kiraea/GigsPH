@@ -1,6 +1,6 @@
 namespace GigPH.Features.Post.GetPublicPost;
 
-public class GetPublicPostResponse
+public record GetPublicPostResponse
 {
     public Guid Id { get; init; }
     public Guid UserId { get; init; }

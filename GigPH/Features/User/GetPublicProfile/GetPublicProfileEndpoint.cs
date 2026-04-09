@@ -1,7 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace GigPH.Features.User.GetProfileById;
+namespace GigPH.Features.User.GetPublicProfile;
 
 
 [ApiController]
@@ -16,11 +17,11 @@ public class GetPublicProfileEndpoint : ControllerBase
 
     [HttpGet("{userId:Guid}")]
     public async Task<ActionResult<GetPublicProfileResponse>> GetProfile(
-        [FromRoute] Guid userId,
-        [FromQuery] bool includeSocialLinks = false)
+        [FromRoute] Guid userId )
     {
-        var query = new GetPublicProfileRequest(userId, includeSocialLinks);
-        var profile = await _handler.HandleAsync(query);
+
+
+        var profile = await _handler.HandleAsync(userId);
         return profile;
     }
     

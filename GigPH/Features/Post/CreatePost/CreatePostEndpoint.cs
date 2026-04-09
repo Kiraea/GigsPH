@@ -24,16 +24,14 @@ public class CreatePostEndpoint : ControllerBase
     [Authorize]
     [HttpPost]
     public async Task<ActionResult<CreatePostResponse>> CreatePost(
-        [FromForm] CreatePostRequest request)
+         [FromForm] CreatePostRequest request)
     {
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userId, out var result))
+        var result = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(result, out var requesterUserId))
         {
             return Unauthorized();
         }
 
-        request.UserId = result;
         
         var validationResponse = await _validator.ValidateAsync(request);
         if (!validationResponse.IsValid)
@@ -41,7 +39,7 @@ public class CreatePostEndpoint : ControllerBase
             return ValidationProblem(validationResponse.ToString());
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(requesterUserId, request);
         return response;
     }
 
