@@ -32,6 +32,12 @@ export interface GetPublicPostsResponse{
     fileName?: string | null,
 }
 
+export interface GetPublicPostsWrapperResponse{
+    posts: GetPublicPostsResponse[],
+    hasNextPage: boolean
+}
+
+
 
 
 export interface UpdatePostRequest {
@@ -54,12 +60,50 @@ export interface UpdatePostResponse{
 
 // usePosts.ts - list fetch only
 export const usePosts = () => {
+    const {setErrors} = useErrorHandler()
     
-    const { data: posts, pending: postsPending, error: postsError } = useFetch<GetPublicPostsResponse[]>(
-        '/api/posts',
-        { key: 'posts' }
-    );
-    return { posts, postsPending, postsError };
+    const Posts = ref<GetPublicPostsResponse[]>([])
+    const limit = 5
+    const page =  ref(1);
+    const hasNextPage = ref(true);
+    const isPending = ref(false);
+    
+    const { data: InitialPosts, pending:InitialPostsPending,  error: InitialPostsError } = useFetch<GetPublicPostsWrapperResponse>(
+        `/api/posts/?page=${page.value}&limit=${limit}`, {
+            onResponseError({response}){
+                console.log(response._data)
+                setErrors(response._data)
+            },
+            lazy: import.meta.client,
+        });
+        
+    watch(InitialPosts, (newPosts) => {
+        if (!newPosts) return;
+        Posts.value=newPosts.posts;
+        hasNextPage.value = newPosts?.hasNextPage;
+        if(hasNextPage){
+            page.value++;
+        }
+    })
+
+    const isLoading = computed(()=> isPending.value || InitialPostsPending.value)
+    
+    
+    const fetchMorePosts = async () => {
+        try{
+            const result = await $fetch<GetPublicPostsWrapperResponse>(`/api/posts/?page=${page.value}&limit=${limit}`, {
+            })    
+            Posts.value?.push(...result.posts) 
+            hasNextPage.value = result.hasNextPage
+            if (hasNextPage.value){
+                page.value++;
+            }
+        }catch(e){
+            setErrors(e)
+        }
+    }
+    
+    
 };
 
 
@@ -89,7 +133,6 @@ export const usePostMutations = () => {
                 body: formData,
                 credentials: 'include',
             });
-            await refreshNuxtData('posts');
         } catch (e) {
             setErrors(e);
             throw e;

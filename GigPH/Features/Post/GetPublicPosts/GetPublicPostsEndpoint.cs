@@ -17,9 +17,10 @@ public class GetPublicPostsEndpoint : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<GetPublicPostsResponse>>> GetPublicPosts()
+    public async Task<ActionResult<GetPublicPostsWrapperResponse>> GetPublicPosts(
+        [FromQuery] int page, [FromQuery] int limit)
     {
-        var response = await _handler.HandleAsync();
+        var response = await _handler.HandleAsync(page, limit);
         return response;
     }
 }

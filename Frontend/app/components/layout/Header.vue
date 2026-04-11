@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+const {isLoggedIn, user} = useAuth()
 </script>
 
 <template>
@@ -11,7 +12,7 @@
         <a href="" class="hover:text-black"> Discover Bands</a>
       </nav >
     </div>
- 
-    <div>User</div>
+    <NuxtLink :to="`/profile/${user.id}`" v-if="user">User</NuxtLink>
+    <NuxtLink to="/login" v-else>Login</NuxtLink>
   </header>  
 </template>

@@ -14,11 +14,30 @@ public class GetPublicPostsHandler
         _s3 = s3;
 
     }
-    public async Task<List<GetPublicPostsResponse>> HandleAsync()
+    public async Task<GetPublicPostsWrapperResponse> HandleAsync(int page = 1 , int limit = 5)
     {
+        // 5 post in 1 page
+
+        var postToFetch = limit + 1;
+        // pages 4 //limit 5 // 15 pages total
+        
+        // give 5-10
+        
+        // how do we know that there exists more?
         var posts = await _dbContext.Posts.Include(post => post.Media)
             .Include(p => p.User)
+            .Skip((page-1) * limit) 
+            .Take(postToFetch)
             .ToListAsync();
+        
+        
+        var hasNextPage = posts.Count == postToFetch;
+        
+        
+        if (hasNextPage)
+        {
+            posts.RemoveAt(limit);
+        }
         var postsResponse = posts.Select(p => new GetPublicPostsResponse()
         {
             Description = p.Description,
@@ -31,7 +50,12 @@ public class GetPublicPostsHandler
             UserId = p.UserId,
             Title = p.Title,
         }).ToList();
-        return postsResponse;
+        
+        return new GetPublicPostsWrapperResponse()
+        {
+            Posts = postsResponse ?? [],
+            HasNextPage =  hasNextPage
+        };
 
     }
 }

@@ -11,5 +11,6 @@ public record GetPublicPostsResponse
     public string? MediaUrl { get; init; }
     public string? MediaType { get; init; }
     public string? FileName { get; init; }  
+    
  
 }
