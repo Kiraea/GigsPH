@@ -9,12 +9,14 @@ public class LoginEndpoint : ControllerBase
 {
     private readonly IValidator<LoginRequest> _validator;
     private readonly LoginHandler _handler;
+    private readonly IWebHostEnvironment _env;
     
-    public LoginEndpoint(LoginHandler handler, IValidator<LoginRequest> validator)
+    public LoginEndpoint(LoginHandler handler, IValidator<LoginRequest> validator, IWebHostEnvironment env)
     {
         _validator = validator;
         _handler = handler;
-        
+        _env = env;
+
     }
 
     [HttpPost]
@@ -27,7 +29,15 @@ public class LoginEndpoint : ControllerBase
         }
 
         var response = await _handler.Handle(request);
-
+        Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions()
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
+        });
+        
+       
+        
         return Ok(response);
 
     }

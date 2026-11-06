@@ -12,10 +12,26 @@ riderModule.iml
 *.csproj.user
 *_Resharper.Caches/
 
-/appSettings.Custom.json
+appsettings.Custom.json
 .env
 .env.*
 !.env.example
 
 *.log
 TestResults/
+
+
+#FRONTEND
+/frontend/node_modules/
+/frontend/.DS_Store
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/*.local
+/frontend/.env
+/frontend/.nitro/
+/frontend/.tanstack/
+/frontend/.wrangler/
+/frontend/.output/
+/frontend/.vinxi/
+/frontend/__unconfig*
+/frontend/todos.json

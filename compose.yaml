@@ -2,6 +2,6 @@
   prja:
     image: prja
     build:
-      context: .
+      context: ./Backend
       dockerfile: Dockerfile
 

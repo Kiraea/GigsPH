@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PrjA.Domain.Entities;
+using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
 using PrjA.Features.Auth.Register;
 using PrjA.Infrastructure;
@@ -34,13 +35,22 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+    
 }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters.RequireAudience = true;
     options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:ValidAudience"];
     options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
     options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!));
-    
+
+    options.Events = new JwtBearerEvents()
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies["access_token"];
+            return Task.CompletedTask;
+        }
+    };
 });
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
@@ -53,6 +63,20 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterHandler>();
+builder.Services.AddScoped<CheckTokenHandler>();
+
+
+
+const string FrontendCors = "Frontend";
+
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCors, policy =>
+    {
+        policy.WithOrigins(allowedOrigins!).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -83,6 +107,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+
+
+app.UseCors(FrontendCors);
 app.UseAuthorization();
 
 app.MapControllers();
