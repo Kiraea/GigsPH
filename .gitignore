@@ -17,6 +17,8 @@ appsettings.Custom.json
 .env.*
 !.env.example
 
+/Notes
+/AGENTS.md
 *.log
 TestResults/
 

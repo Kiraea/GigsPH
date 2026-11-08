@@ -10,6 +10,14 @@ public class AppDbContext : IdentityDbContext<AppUser>
     {
 
     }
+    
+    //onModelCreating
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<UserInstrument>().HasKey(x => new {x.AppUserId, x.InstrumentId});
+    } 
 
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Band> Bands { get; set; }

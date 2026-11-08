@@ -9,8 +9,8 @@ public class Location
     public string City { get; set; }
     
     
-    public double latitude { get; set; }
-    public double longitude { get; set; }
+    public double? latitude { get; set; }
+    public double? longitude { get; set; }
     
     public ICollection<AppUser> AppUsers { get; set; } = new List<AppUser>();
     

@@ -11,7 +11,7 @@ public class AppUser : IdentityUser
 
     public bool IsOnboarded { get; set; } = false;
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
-    public ICollection<Instrument> Instruments { get; set; } = [];
+    public ICollection<UserInstrument> UserInstruments { get; set; } = [];
     public ICollection<SocialLink> SocialLinks { get; set; } = [];
     public ICollection<Band> Band { get; set; } = [];
     

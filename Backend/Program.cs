@@ -9,6 +9,8 @@ using PrjA.Domain.Entities;
 using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
 using PrjA.Features.Auth.Register;
+using PrjA.Features.User.Onboarding;
+using PrjA.Features.User.UpdateProfile;
 using PrjA.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,9 +66,10 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<CheckTokenHandler>();
+builder.Services.AddScoped<UpdateProfileHandler>();
 
 
-
+builder.Services.AddScoped<OnboardingHandler>();
 const string FrontendCors = "Frontend";
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
