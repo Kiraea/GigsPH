@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -9,6 +10,7 @@ using PrjA.Domain.Entities;
 using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
 using PrjA.Features.Auth.Register;
+using PrjA.Features.User.GetPublicProfile;
 using PrjA.Features.User.Onboarding;
 using PrjA.Features.User.UpdateProfile;
 using PrjA.Infrastructure;
@@ -17,7 +19,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(
+        namingPolicy:null, allowIntegerValues:false));
+    // naming policy mean that it wont follow the camelcase like facebook it will still be Facebook
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -68,6 +75,7 @@ builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<CheckTokenHandler>();
 builder.Services.AddScoped<UpdateProfileHandler>();
 
+builder.Services.AddScoped<GetPublicProfileHandler>();
 
 builder.Services.AddScoped<OnboardingHandler>();
 const string FrontendCors = "Frontend";

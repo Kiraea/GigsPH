@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace PrjA.Features.Auth.Login;
 
 [ApiController]
-[Route("/api/auth/")]
+[Route("/api/auth")]
 public class LoginEndpoint : ControllerBase
 {
     private readonly IValidator<LoginRequest> _validator;
@@ -19,7 +19,7 @@ public class LoginEndpoint : ControllerBase
 
     }
 
-    [HttpPost]
+    [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         var result = await _validator.ValidateAsync(request);
@@ -28,7 +28,7 @@ public class LoginEndpoint : ControllerBase
             string errors = string.Join(Environment.NewLine, result.Errors.Select(e => e.ErrorMessage));
         }
 
-        var response = await _handler.Handle(request);
+        var response = await _handler.HandleAsync(request);
         Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions()
         {
             HttpOnly = true,

@@ -18,7 +18,7 @@ public class OnboardingHandler
         _dbContext = dbContext;
     }
 
-    public async Task<OnboardingResponse> Handle(OnboardingRequest request, string userId)
+    public async Task<OnboardingResponse> HandleAsync(OnboardingRequest request, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)

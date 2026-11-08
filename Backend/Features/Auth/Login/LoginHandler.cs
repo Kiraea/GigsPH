@@ -27,7 +27,7 @@ public class LoginHandler
         _roleManager = roleManager;
     }
 
-    public async Task<LoginResponse> Handle(LoginRequest request)
+    public async Task<LoginResponse> HandleAsync(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.UsernameOrEmail);
 

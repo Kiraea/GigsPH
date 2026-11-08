@@ -35,9 +35,9 @@ export const AuthContextProvider = ({ children }) => {
             try {
                 const response = await axiosInstance.get(`/checkToken`)
                 setUser({
-                    displayName: response.data.DisplayName,
-                    id: response.data.Id,
-                    isOnboarded: response.data.IsOnboarded,
+                    displayName: response.data.displayName,
+                    id: response.data.id,
+                    isOnboarded: response.data.isOnboarded,
                 })
                 setIsLoggedIn(true)
             } catch (error) {

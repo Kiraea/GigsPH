@@ -31,7 +31,7 @@ public class CheckTokenEndpoint : ControllerBase
             return Unauthorized();
         }
 
-        var response = await _handler.Handle(userId);
+        var response = await _handler.HandleAsync(userId);
 
         return response;
     }
@@ -49,7 +49,7 @@ public class CheckTokenHandler
         _userManager = userManager;
     }
 
-    public async Task<CheckTokenResponse> Handle(string userId)
+    public async Task<CheckTokenResponse> HandleAsync(string userId)
     {
 
         var user = await _userManager.FindByIdAsync(userId);

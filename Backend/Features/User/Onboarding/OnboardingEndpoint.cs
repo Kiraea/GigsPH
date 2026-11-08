@@ -41,7 +41,7 @@ public class OnboardingEndpoint: ControllerBase
 
         try
         {
-            var response = await _handler.Handle(request, userId);
+            var response = await _handler.HandleAsync(request, userId);
             return Ok(response);
         }
         catch (ValidationException exception)

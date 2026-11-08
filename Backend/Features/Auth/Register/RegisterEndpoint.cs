@@ -11,12 +11,14 @@ namespace PrjA.Features.Auth.Register;
 public class RegisterEndpoint  : ControllerBase
 {
    private readonly IValidator<RegisterRequest> _validator;
-   public RegisterEndpoint(IValidator<RegisterRequest> validator)
+   private readonly RegisterHandler _handler;
+   public RegisterEndpoint(IValidator<RegisterRequest> validator, RegisterHandler handler)
    {
       _validator = validator;
+      _handler = handler;
    }
 
-   [HttpPost]
+   [HttpPost("register")]
    public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
    {
       
@@ -26,8 +28,11 @@ public class RegisterEndpoint  : ControllerBase
          string errors = string.Join(Environment.NewLine, result.Errors.Select(x => $"{x.ErrorMessage}"));
       }
       
+      var response = await _handler.HandleAsync(request);
       
-      return Ok(result);
+      
+      
+      return Ok(response);
 
    }
 }

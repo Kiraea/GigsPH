@@ -10,7 +10,7 @@ namespace PrjA.Features.User.UpdateProfile;
 
 
 [ApiController]
-[Route("api/user/")]
+[Route("/api/user")]
 public class UpdateProfileEndpoint : ControllerBase
 {
     private readonly IValidator<UpdateProfileRequest> _validator;
@@ -41,7 +41,7 @@ public class UpdateProfileEndpoint : ControllerBase
             return BadRequest(errors);
         }
         
-        var response = _handler.Handle(request, userId);
+        var response = _handler.HandleAsync(request, userId);
         
     }
 }

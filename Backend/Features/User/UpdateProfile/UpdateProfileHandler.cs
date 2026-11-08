@@ -16,7 +16,7 @@ public class UpdateProfileHandler
         _dbContext = dbContext;
     }
 
-    public async Task<UpdateProfileResponse> Handle(UpdateProfileRequest request, string userId)
+    public async Task<UpdateProfileResponse> HandleAsync(UpdateProfileRequest request, string userId)
     {
 
         var user = await _userManager.FindByIdAsync(userId);
