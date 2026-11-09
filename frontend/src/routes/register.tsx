@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { type RegisterRequest, useRegister } from '#/queries/auth/api.ts'
+import { type RegisterRequest, useRegister } from '#/queries/authQueries.ts'
 import type { SubmitEvent } from 'react'
 export const Route = createFileRoute('/register')({
     component: RegisterPage,
 })
 
 function RegisterPage() {
+    const registration = useRegister()
     const submitRegister = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         const form = new FormData(e.currentTarget)
@@ -15,7 +16,6 @@ function RegisterPage() {
             return
         }
         const request: RegisterRequest = { email: email, password: password }
-        const registration = useRegister()
 
         registration.mutate(request)
     }

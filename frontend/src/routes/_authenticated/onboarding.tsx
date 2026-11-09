@@ -1,10 +1,31 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, ErrorComponent } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { axiosInstance } from '#/axiosInstance.tsx'
-
+import { QueryClient, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import {
+    type GenresOptions,
+    getGenresOptionsQuery,
+    getInstrumentOptionsQuery,
+    type InstrumentOptions,
+} from '#/queries/OnboardingQueries.ts'
 export const Route = createFileRoute('/_authenticated/onboarding')({
     component: OnboardingPage,
+    loader: async ({ context }) => {
+        /*
+        await Promise.all([
+            context.queryClient.query(getGenresOptionsQuery),
+            context.queryClient.query(getInstrumentOptionsQuery),
+        ])
+        
+         */
+    },
+    /*
+    pendingComponent: () => <p>Loading Existing Genres and Instruments</p>,
+    errorComponent: () => <p>Something went wrong</p>,
+    
+    
+     */
 })
 
 type Platform = 'Facebook' | 'Twitter'
@@ -18,6 +39,8 @@ type Location = {
     city: string
     country: string
     provinceState: string
+    latitude: number | undefined
+    longitude: number | undefined
 }
 
 type Profile = {
@@ -48,17 +71,83 @@ type ProvinceStateOption = {
 type CityResponse = {
     results?: {
         city?: string
+        lat: number
+        lon: number
     }[]
+}
+
+type CityOption = {
+    city: string
+    lat: number
+    lon: number
 }
 
 function OnboardingPage() {
     const step = ['Profile', 'Genres', 'Instruments', 'Review']
     const [currentStep, setCurrentStep] = useState(0)
 
+    //const { data: genresData } = useQuery(getGenresOptionsQuery)
+    //const { data: insturmentsData } = useQuery(getGenresOptionsQuery)
+
+    const genresData: GenresOptions[] = [
+        { id: 'john', name: 'test' },
+        { id: 'jwohn', name: 'test' },
+        { id: 'jwwwohn', name: 'test' },
+        { id: 'jiiwwwohn', name: 'test' },
+    ]
+
+    const instrumentsData: InstrumentOptions[] = [
+        { id: 'john', name: 'test' },
+        { id: 'jwohn', name: 'test' },
+        { id: 'jwwwohn', name: 'test' },
+        { id: 'jiiwwwohn', name: 'test' },
+    ]
+
+    const [genres, setGenres] = useState<string[]>([''])
+    const [instruments, setInstruments] = useState<Instruments[]>([
+        {
+            id: '',
+            isMain: false,
+        },
+    ])
+
+    const changeInstrument = (
+        rowIndex: number,
+        selectedId: string,
+        isMain: boolean,
+    ) => {
+        setInstruments((prev) => {
+            const updated = [...prev]
+            // reason why [...] is because 1. u cant edit state directly, [.. allows for creation of new array diff memory
+            updated[rowIndex] = {
+                id: selectedId,
+                isMain: isMain,
+            }
+            return updated
+        })
+    }
+
     const [provinceStateOptions, setProvinceStateOptions] = useState<
         ProvinceStateOption[]
     >([])
-    const [cityOptions, setCityOptions] = useState<string[]>([])
+    const [cityOptions, setCityOptions] = useState<CityOption[]>([])
+
+    const changeCity = (city: string) => {
+        const getCityProperties = cityOptions.find(
+            (cityOption) => cityOption.city === city,
+        )
+
+        setProfile((prev) => {
+            return {
+                ...prev,
+                location: {
+                    ...prev.location,
+                    latitude: getCityProperties?.lat,
+                    longitude: getCityProperties?.lon,
+                },
+            }
+        })
+    }
 
     const [profile, setProfile] = useState<Profile>({
         firstName: '',
@@ -70,6 +159,8 @@ function OnboardingPage() {
             city: '',
             country: 'Philippines',
             provinceState: '',
+            latitude: undefined,
+            longitude: undefined,
         },
     })
 
@@ -158,12 +249,13 @@ function OnboardingPage() {
                     `https://api.geoapify.com/v1/geocode/autocomplete?${parameters}`,
                 )
                 console.log(response.data.results)
-                const availableCities = (response.data.results ?? [])
-                    .map((row) => row.city)
-                    .filter(
-                        (name): name is string =>
-                            typeof name === 'string' && name.length > 0,
-                    )
+                const availableCities = (response.data.results ?? []).filter(
+                    (row): row is CityOption =>
+                        typeof row.city === 'string' &&
+                        row.city.length > 0 &&
+                        typeof row.lat === 'number' &&
+                        typeof row.lon === 'number',
+                )
                 if (!ignoreResult) {
                     setCityOptions(availableCities)
                 }
@@ -183,8 +275,13 @@ function OnboardingPage() {
         provinceStateValid,
     ])
 
-    const [genres, setGenres] = useState<string[]>([])
-    const [instruments, setInstruments] = useState<Instruments[]>([])
+    function changeGenre(rowIndex: number, selectedId: string) {
+        setGenres((prev) =>
+            prev.map((genreId, index) =>
+                index === rowIndex ? selectedId : genreId,
+            ),
+        )
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen">
@@ -201,7 +298,7 @@ function OnboardingPage() {
                         </button>
                     ))}
                 </div>
-                <div className="flex flex-col border-2 border-blac min-h-96 p-6">
+                <div className="flex flex-col border-2 border-black min-h-96 p-6">
                     {currentStep === 0 && (
                         <>
                             <label>Firstname</label>
@@ -266,22 +363,15 @@ function OnboardingPage() {
                                 list="city-options"
                                 value={profile.location.city}
                                 disabled={!provinceStateValid}
-                                onChange={(e) =>
-                                    setProfile((previous) => {
-                                        return {
-                                            ...previous,
-                                            location: {
-                                                ...previous.location,
-                                                city: e.target.value,
-                                            },
-                                        }
-                                    })
-                                }
+                                onChange={(e) => changeCity(e.target.value)}
                             />
                             <datalist id="city-options">
                                 {cityOptions.map((option) => (
-                                    <option key={option} value={option}>
-                                        {option}
+                                    <option
+                                        key={option.city}
+                                        value={option.city}
+                                    >
+                                        {option.city}
                                     </option>
                                 ))}
                             </datalist>
@@ -324,9 +414,146 @@ function OnboardingPage() {
                             />
                         </>
                     )}
-                    {currentStep === 1 && <div>Genres</div>}
-                    {currentStep === 2 && <div>Instruments </div>}
-                    {currentStep === 3 && <div>Review </div>}
+                    {currentStep === 1 && (
+                        <>
+                            {genres.map((genreId, index) => (
+                                <div key={index} className="flex flex-col">
+                                    <label> Genre {index}</label>
+                                    <select
+                                        id={`genre-${genreId}`}
+                                        value={genreId}
+                                        onChange={(e) => {
+                                            changeGenre(index, e.target.value)
+                                        }}
+                                    >
+                                        <option value="" disabled>
+                                            Select a Genre
+                                        </option>
+                                        {genresData.map((genre) => (
+                                            <option
+                                                key={`option-${genre.id}`}
+                                                value={genreId}
+                                            >
+                                                {genre.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ))}
+                            <div className="flex  gap-2 justify-end w-full">
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        if (genres.length < 5) {
+                                            setGenres((prev) => [...prev, ''])
+                                        }
+                                    }}
+                                    className="bg-green-300 "
+                                >
+                                    Add Genre +
+                                </button>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        if (genres.length > 1) {
+                                            setGenres((prev) =>
+                                                prev.slice(0, -1),
+                                            )
+                                        }
+                                    }}
+                                    className="bg-green-300 "
+                                >
+                                    Remove -
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                    {currentStep === 2 && (
+                        <>
+                            <label>Select what instrument you play</label>
+
+                            {instruments.map((instrument, index) => (
+                                <div key={`instrument-${index}`}>
+                                    <label>Instrument {index}</label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={instrument.id}
+                                            onChange={(e) =>
+                                                changeInstrument(
+                                                    index,
+                                                    e.target.value,
+                                                    false,
+                                                )
+                                            }
+                                        >
+                                            <option value="" disabled>
+                                                Select an instrument
+                                            </option>
+
+                                            {instrumentsData.map(
+                                                (instrument) => (
+                                                    <option
+                                                        key={instrument.id}
+                                                        value={instrument.id}
+                                                    >
+                                                        {instrument.name}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </select>
+                                        <input
+                                            type="checkbox"
+                                            checked={instrument.isMain}
+                                            onChange={(e) =>
+                                                changeInstrument(
+                                                    index,
+                                                    instrument.id,
+                                                    e.target.checked,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            <div className="flex gap-2 justify-end w-full">
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        if (instruments.length < 4) {
+                                            setInstruments((prev) => [
+                                                ...prev,
+                                                {
+                                                    id: '',
+                                                    isMain: false,
+                                                },
+                                            ])
+                                        }
+                                    }}
+                                    className="bg-green-300"
+                                >
+                                    Add Instrument +
+                                </button>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        if (instruments.length > 1) {
+                                            setInstruments((prev) =>
+                                                prev.slice(0, -1),
+                                            )
+                                        }
+                                    }}
+                                    className="bg-green-300"
+                                >
+                                    Remove +
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    {currentStep === 3 && <div></div>}
                 </div>
             </div>
         </div>

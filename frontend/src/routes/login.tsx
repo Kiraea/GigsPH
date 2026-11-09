@@ -1,11 +1,12 @@
 ﻿import { createFileRoute, Link } from '@tanstack/react-router'
-import { type LoginRequest, useLogin } from '#/queries/auth/api.ts'
+import { type LoginRequest, useLogin } from '#/queries/authQueries.ts'
 import type { SubmitEvent } from 'react'
 export const Route = createFileRoute('/login')({
     component: LoginPage,
 })
 
 function LoginPage() {
+    const login = useLogin()
     const submitLogin = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         const form = new FormData(e.currentTarget)
@@ -21,7 +22,6 @@ function LoginPage() {
             usernameOrEmail: usernameOrEmail,
             password: password,
         }
-        const login = useLogin()
         login.mutate(request)
     }
     console.log(import.meta.env.VITE_API_URL)
