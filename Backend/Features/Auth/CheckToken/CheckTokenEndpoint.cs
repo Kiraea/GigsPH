@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
 using PrjA.Domain.Entities;
 
 namespace PrjA.Features.Auth.CheckToken;
@@ -24,16 +23,26 @@ public class CheckTokenEndpoint : ControllerBase
     [Authorize]
     public async Task<ActionResult<CheckTokenResponse>> CheckToken()
     {
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-        if (userId == null)
+        try
         {
-            return Unauthorized();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                throw new InvalidSessionException();
+            }
+
+            var response = await _handler.HandleAsync(userId);
+            return Ok(response);
         }
-
-        var response = await _handler.HandleAsync(userId);
-
-        return response;
+        catch (InvalidSessionException exception)
+        {
+            return Unauthorized(new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = exception.Message
+            });
+        }
     }
 
 
@@ -56,7 +65,7 @@ public class CheckTokenHandler
 
         if (user == null)
         {
-            throw new Exception("User not found");
+            throw new InvalidSessionException();
         }
 
         return new CheckTokenResponse()

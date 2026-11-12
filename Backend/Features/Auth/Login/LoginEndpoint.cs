@@ -25,20 +25,36 @@ public class LoginEndpoint : ControllerBase
         var result = await _validator.ValidateAsync(request);
         if (!result.IsValid)
         {
-            string errors = string.Join(Environment.NewLine, result.Errors.Select(e => e.ErrorMessage));
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(
+                    error.PropertyName,
+                    error.ErrorMessage);
+            }
+
+            return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request);
-        Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions()
+        try
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
-        });
-        
-       
-        
-        return Ok(response);
+            var response = await _handler.HandleAsync(request);
+            Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions()
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
+            });
+
+            return Ok(response);
+        }
+        catch (InvalidCredentialsException exception)
+        {
+            return Unauthorized(new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = exception.Message
+            });
+        }
 
     }
     

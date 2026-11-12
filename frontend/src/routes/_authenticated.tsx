@@ -15,15 +15,12 @@ function AuthenticatedLayout() {
     if (auth?.isLoading) {
         return <p>Waiting...</p>
     } else {
-        /*
         if (!auth?.user) {
             return <Navigate to="/login" replace />
         }
-        if (!auth?.user.isOnboarded && pathname === '/onboarding') {
+        if (!auth?.user.isOnboarded && pathname !== '/onboarding') {
             return <Navigate to="/onboarding" replace />
         }
-        
-         */
     }
     return <Outlet />
 }

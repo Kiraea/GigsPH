@@ -13,7 +13,7 @@ public class AppUser : IdentityUser
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<UserInstrument> UserInstruments { get; set; } = [];
     public ICollection<SocialLink> SocialLinks { get; set; } = [];
-    public ICollection<Band> Bands { get; set; } = [];
+    public ICollection<UserBand> UserBands { get; set; } = [];
     
     
     public Guid? LocationId { get; set; } 

@@ -12,20 +12,13 @@ import {
 export const Route = createFileRoute('/_authenticated/onboarding')({
     component: OnboardingPage,
     loader: async ({ context }) => {
-        /*
         await Promise.all([
             context.queryClient.query(getGenresOptionsQuery),
             context.queryClient.query(getInstrumentOptionsQuery),
         ])
-        
-         */
     },
-    /*
     pendingComponent: () => <p>Loading Existing Genres and Instruments</p>,
     errorComponent: () => <p>Something went wrong</p>,
-    
-    
-     */
 })
 
 type Platform = 'Facebook' | 'Twitter'
@@ -86,22 +79,8 @@ function OnboardingPage() {
     const step = ['Profile', 'Genres', 'Instruments', 'Review']
     const [currentStep, setCurrentStep] = useState(0)
 
-    //const { data: genresData } = useQuery(getGenresOptionsQuery)
-    //const { data: insturmentsData } = useQuery(getGenresOptionsQuery)
-
-    const genresData: GenresOptions[] = [
-        { id: 'john', name: 'test' },
-        { id: 'jwohn', name: 'test' },
-        { id: 'jwwwohn', name: 'test' },
-        { id: 'jiiwwwohn', name: 'test' },
-    ]
-
-    const instrumentsData: InstrumentOptions[] = [
-        { id: 'john', name: 'test' },
-        { id: 'jwohn', name: 'test' },
-        { id: 'jwwwohn', name: 'test' },
-        { id: 'jiiwwwohn', name: 'test' },
-    ]
+    const { data: genresData = [] } = useQuery(getGenresOptionsQuery)
+    const { data: instrumentsData = [] } = useQuery(getInstrumentOptionsQuery)
 
     const [genres, setGenres] = useState<string[]>([''])
     const [instruments, setInstruments] = useState<Instruments[]>([
@@ -142,6 +121,7 @@ function OnboardingPage() {
                 ...prev,
                 location: {
                     ...prev.location,
+                    city: city,
                     latitude: getCityProperties?.lat,
                     longitude: getCityProperties?.lon,
                 },
@@ -283,6 +263,11 @@ function OnboardingPage() {
         )
     }
 
+    const selectedGenres = genres.filter((id) => id !== '')
+    const selectedInstruments = instruments.filter(
+        (instrument) => instrument.id !== '',
+    )
+
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-col w-1/2 gap-2 ">
@@ -382,15 +367,21 @@ function OnboardingPage() {
                                 type="text"
                                 value={profile.location.provinceState}
                                 onChange={(e) =>
+                                {
+                                    setCityOptions([])
                                     setProfile((previous) => {
                                         return {
                                             ...previous,
                                             location: {
                                                 ...previous.location,
                                                 provinceState: e.target.value,
+                                                city: '',
+                                                latitude: undefined,
+                                                longitude: undefined,
                                             },
                                         }
                                     })
+                                }
                                 }
                             />
                             <datalist id="province-state-options">
@@ -432,7 +423,7 @@ function OnboardingPage() {
                                         {genresData.map((genre) => (
                                             <option
                                                 key={`option-${genre.id}`}
-                                                value={genreId}
+                                                value={genre.id}
                                             >
                                                 {genre.name}
                                             </option>
@@ -553,7 +544,109 @@ function OnboardingPage() {
                             </div>
                         </>
                     )}
-                    {currentStep === 3 && <div></div>}
+                    {currentStep === 3 && (
+                        <section className="flex flex-col gap-4">
+                            <h2>Review your information</h2>
+                            <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3">
+                                <dt>First name</dt>
+                                <dd>
+                                    {profile.firstName.trim() || 'Not provided'}
+                                </dd>
+
+                                <dt>Last name</dt>
+                                <dd>
+                                    {profile.lastName.trim() || 'Not provided'}
+                                </dd>
+
+                                <dt>Display name</dt>
+                                <dd>
+                                    {profile.displayName.trim() ||
+                                        'Not provided'}
+                                </dd>
+
+                                <dt>Description</dt>
+                                <dd className="whitespace-pre-wrap break-words">
+                                    {profile.description.trim() ||
+                                        'Not provided'}
+                                </dd>
+
+                                <dt>Location</dt>
+                                <dd>
+                                    {[
+                                        profile.location.city,
+                                        profile.location.provinceState,
+                                        profile.location.country,
+                                    ]
+                                        .filter((part) => part.trim() !== '')
+                                        .join(', ') || 'Not provided'}
+                                </dd>
+
+                                <dt>Genres</dt>
+                                <dd>
+                                    {selectedGenres.length > 0 ? (
+                                        <ul>
+                                            {selectedGenres.map((id, index) => (
+                                                <li key={`${id}-${index}`}>
+                                                    {genresData.find(
+                                                        (genre) =>
+                                                            genre.id === id,
+                                                    )?.name || 'Unknown genre'}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        'None selected'
+                                    )}
+                                </dd>
+
+                                <dt>Instruments</dt>
+                                <dd>
+                                    {selectedInstruments.length > 0 ? (
+                                        <ul>
+                                            {selectedInstruments.map(
+                                                (instrument, index) => (
+                                                    <li
+                                                        key={`${instrument.id}-${index}`}
+                                                    >
+                                                        {instrumentsData.find(
+                                                            (option) =>
+                                                                option.id ===
+                                                                instrument.id,
+                                                        )?.name ||
+                                                            'Unknown instrument'}
+                                                        {instrument.isMain &&
+                                                            ' (Main)'}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    ) : (
+                                        'None selected'
+                                    )}
+                                </dd>
+
+                                <dt>Social links</dt>
+                                <dd>
+                                    {profile.socialLinks.length > 0 ? (
+                                        <ul>
+                                            {profile.socialLinks.map(
+                                                (link, index) => (
+                                                    <li
+                                                        key={`${link.platform}-${index}`}
+                                                    >
+                                                        {link.platform}:{' '}
+                                                        {link.url}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    ) : (
+                                        'None added'
+                                    )}
+                                </dd>
+                            </dl>
+                        </section>
+                    )}
                 </div>
             </div>
         </div>

@@ -33,14 +33,14 @@ public class LoginHandler
 
         if (user == null)
         {
-            throw new Exception("Wrong username and Password");
+            throw new InvalidCredentialsException();
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
         if (!result.Succeeded)
         {
-            throw new Exception("Wrong username and Password");
+            throw new InvalidCredentialsException();
         }
 
 
@@ -68,7 +68,7 @@ public class LoginHandler
 
         if (accessToken == null)
         {
-            throw new Exception("invalid password or username");
+            throw new InvalidOperationException("Failed to create an access token.");
         }
 
         return new LoginResponse()

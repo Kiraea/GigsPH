@@ -13,7 +13,7 @@ export type RegisterResponse = {
 async function register(request: RegisterRequest): Promise<RegisterResponse> {
     try {
         const response = await axiosInstance.post<RegisterResponse>(
-            '/auth/login',
+            '/auth/Register',
             request,
         )
         return response.data
@@ -54,7 +54,7 @@ export type LoginRequest = {
 }
 
 export type LoginResponse = {
-    username: string
+    userName: string
     email: string
     accessToken: string
 }

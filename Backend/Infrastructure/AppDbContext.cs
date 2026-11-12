@@ -20,6 +20,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
     } 
 
     public DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<BandInvitation> BandInvitations { get; set; }
+    public DbSet<UserBand> UserBands { get; set; }
+    public DbSet<UserInstrument> UserInstruments { get; set; }
     public DbSet<Band> Bands { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<Instrument> Instruments { get; set; }

@@ -24,19 +24,23 @@ public class RegisterHandler
             Email = request.Email,
         };
 
+        await using var transaction =  await _dbContext.Database.BeginTransactionAsync();
         var result = await _userManager.CreateAsync(user, request.Password!);
         if (!result.Succeeded)
         {
-            string errors = string.Join(Environment.NewLine, result.Errors.Select(e => e.Description));
-            throw new Exception(errors);
+            throw new RegistrationRejectedException(result.Errors);
         }
 
         var result2 = await _userManager.AddToRoleAsync(user, AppRoles.User);
         if (!result2.Succeeded)
         {
-            string errors = string.Join(Environment.NewLine, result.Errors.Select(e => e.Description));
-            throw new Exception(errors);
+            string errors = string.Join(Environment.NewLine, result2.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to assign the default user role: {errors}");
         }
+
+        await transaction.CommitAsync();
+        
+        
 
         return new RegisterResponse()
         {

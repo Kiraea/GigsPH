@@ -6,7 +6,7 @@
 } from 'react'
 import { useState } from 'react'
 import { axiosInstance } from '#/axiosInstance.tsx'
-interface UserType {
+export interface UserType {
     displayName: string | null
     id: string
     isOnboarded: boolean

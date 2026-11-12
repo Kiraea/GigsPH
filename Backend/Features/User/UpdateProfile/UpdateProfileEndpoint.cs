@@ -41,7 +41,8 @@ public class UpdateProfileEndpoint : ControllerBase
             return BadRequest(errors);
         }
         
-        var response = _handler.HandleAsync(request, userId);
-        
+        var response = await  _handler.HandleAsync(request, userId);
+        return Ok(response);
+
     }
 }

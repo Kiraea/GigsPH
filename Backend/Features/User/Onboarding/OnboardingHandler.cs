@@ -17,7 +17,6 @@ public class OnboardingHandler
         _userManager = userManager;
         _dbContext = dbContext;
     }
-
     public async Task<OnboardingResponse> HandleAsync(OnboardingRequest request, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -25,12 +24,18 @@ public class OnboardingHandler
         {
             throw new KeyNotFoundException("User not found.");
         }
+        
+        user.FirstName = request.FirstName.Trim();
+        user.LastName = request.LastName.Trim();
+        user.DisplayName = request.DisplayName.Trim();
+        user.Description = request.Description?.Trim();
+
 
         if (user.IsOnboarded)
         {
             throw new ValidationException(new[]
             {
-                new ValidationFailure("Onboarding", "Onboarding already completed.");
+                new ValidationFailure("Onboarding", "Onboarding already completed."),
             });
         }
 

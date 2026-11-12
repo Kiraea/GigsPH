@@ -10,10 +10,16 @@ using PrjA.Domain.Entities;
 using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
 using PrjA.Features.Auth.Register;
+using PrjA.Features.Bands.LeaveBand;
+using PrjA.Features.Bands.SendInvitation;
+using PrjA.Features.Bands.UpdateBandMemberRole;
+using PrjA.Features.Genres;
+using PrjA.Features.Instruments;
 using PrjA.Features.User.GetPublicProfile;
 using PrjA.Features.User.Onboarding;
 using PrjA.Features.User.UpdateProfile;
 using PrjA.Infrastructure;
+using PrjA.Infrastructure.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +34,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-
 builder.Configuration.AddJsonFile("appsettings.Custom.json", false, true);
 
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -48,9 +54,9 @@ builder.Services.AddAuthentication(options =>
 }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters.RequireAudience = true;
-    options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:ValidAudience"];
+    options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:Audience"];
     options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
-    options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!));
+    options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!));
 
     options.Events = new JwtBearerEvents()
     {
@@ -74,13 +80,22 @@ builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<CheckTokenHandler>();
 builder.Services.AddScoped<UpdateProfileHandler>();
+builder.Services.AddScoped<GetGenresHandler>();
+builder.Services.AddScoped<GetInstrumentsHandler>();
 
 builder.Services.AddScoped<GetPublicProfileHandler>();
 
+builder.Services.AddScoped<EmailSender>();
 builder.Services.AddScoped<OnboardingHandler>();
+builder.Services.AddScoped<SendInvitationHandler>();
+builder.Services.AddScoped<LeaveBandHandler>();
+builder.Services.AddScoped<UpdateBandMemberRoleHandler>();
+
+
+
 const string FrontendCors = "Frontend";
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCors, policy =>

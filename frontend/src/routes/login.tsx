@@ -1,12 +1,17 @@
-﻿import { createFileRoute, Link } from '@tanstack/react-router'
+﻿import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type LoginRequest, useLogin } from '#/queries/authQueries.ts'
-import type { SubmitEvent } from 'react'
+import { type SubmitEvent, useContext } from 'react'
+import { AuthContext, type UserType } from '#/contexts/authContext.tsx'
+import { axiosInstance } from '#/axiosInstance.tsx'
+import axios from 'axios'
 export const Route = createFileRoute('/login')({
     component: LoginPage,
 })
 
 function LoginPage() {
     const login = useLogin()
+    const auth = useContext(AuthContext)
+    const navigate = useNavigate()
     const submitLogin = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
         const form = new FormData(e.currentTarget)
@@ -22,7 +27,18 @@ function LoginPage() {
             usernameOrEmail: usernameOrEmail,
             password: password,
         }
-        login.mutate(request)
+        login.mutate(request, {
+            onSuccess: async () => {
+                const response =
+                    await axiosInstance.get<UserType>('/checkToken')
+                const user = response.data
+                auth?.setUser(user)
+                auth?.setIsLoggedIn(true)
+                await navigate({
+                    to: user.isOnboarded ? '/' : `/onboarding`,
+                })
+            },
+        })
     }
     console.log(import.meta.env.VITE_API_URL)
 

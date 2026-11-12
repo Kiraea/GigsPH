@@ -25,14 +25,30 @@ public class RegisterEndpoint  : ControllerBase
       var result = await _validator.ValidateAsync(request);
       if (!result.IsValid)
       {
-         string errors = string.Join(Environment.NewLine, result.Errors.Select(x => $"{x.ErrorMessage}"));
+         foreach (var error in result.Errors)
+         {
+            ModelState.AddModelError(
+               error.PropertyName,
+               error.ErrorMessage);
+         }
+
+         return ValidationProblem(ModelState);
       }
       
-      var response = await _handler.HandleAsync(request);
-      
-      
-      
-      return Ok(response);
+      try
+      {
+         var response = await _handler.HandleAsync(request);
+         return Ok(response);
+      }
+      catch (RegistrationRejectedException exception)
+      {
+         foreach (var error in exception.Errors)
+         {
+            ModelState.AddModelError(error.Code, error.Description);
+         }
+
+         return ValidationProblem(ModelState);
+      }
 
    }
 }

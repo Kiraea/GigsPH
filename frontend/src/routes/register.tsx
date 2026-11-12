@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type RegisterRequest, useRegister } from '#/queries/authQueries.ts'
 import type { SubmitEvent } from 'react'
 export const Route = createFileRoute('/register')({
@@ -6,6 +6,7 @@ export const Route = createFileRoute('/register')({
 })
 
 function RegisterPage() {
+    const navigate = useNavigate()
     const registration = useRegister()
     const submitRegister = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -17,7 +18,11 @@ function RegisterPage() {
         }
         const request: RegisterRequest = { email: email, password: password }
 
-        registration.mutate(request)
+        registration.mutate(request, {
+            onSuccess: () => {
+                navigate({ to: '/login' })
+            },
+        })
     }
     console.log(import.meta.env.VITE_API_URL)
 
@@ -39,8 +44,8 @@ function RegisterPage() {
                 >
                     <div className="flex flex-col gap-5">
                         <div className="flex flex-col">
-                            <div className="">Username</div>
-                            <input type="text" name="username" />
+                            <div className="">Email</div>
+                            <input type="text" name="email" />
                         </div>
                         <div className="flex flex-col">
                             <div className="">Password</div>
