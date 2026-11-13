@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
@@ -27,20 +28,30 @@ public class LoginHandler
         _roleManager = roleManager;
     }
 
-    public async Task<LoginResponse> HandleAsync(LoginRequest request)
+    public async Task<Result<LoginResponse>> HandleAsync(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.UsernameOrEmail);
 
         if (user == null)
         {
-            throw new InvalidCredentialsException();
+            return Result<LoginResponse>.Failure(new Error
+            {
+                Code = "User.Invalid",
+                Message = "Invalida username or password",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
         if (!result.Succeeded)
         {
-            throw new InvalidCredentialsException();
+            return Result<LoginResponse>.Failure(new Error
+            {
+                Code = "User.Invalid",
+                Message = "Invalida username or password",
+                Type = ErrorType.BadRequest,
+            });
         }
 
 
@@ -71,13 +82,12 @@ public class LoginHandler
             throw new InvalidOperationException("Failed to create an access token.");
         }
 
-        return new LoginResponse()
-        {
-            AccessToken = accessToken,
-            Email = user.Email!,
-            UserName = user.UserName!
-        };
-        
+        return Result<LoginResponse>.Success(new LoginResponse()
+            {
+                AccessToken = accessToken,
+                Email = user.Email!,
+                UserName = user.UserName!
+            });
         
     }
 }

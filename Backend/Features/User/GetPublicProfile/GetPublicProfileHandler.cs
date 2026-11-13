@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PrjA.Features.User.UpdateProfile;
 using PrjA.Infrastructure;
+using PrjA.Common;
 
 namespace PrjA.Features.User.GetPublicProfile;
 
@@ -13,22 +14,26 @@ public class GetPublicProfileHandler
 
     }
 
-    public async Task<GetPublicProfileResponse> HandleAsync(string userId)
+    public async Task<Result<GetPublicProfileResponse>> HandleAsync(string userId)
     {
         
         var user = await _dbContext.Users.AsNoTracking().Include(u => u.Genres)
             .Include(u => u.UserInstruments).ThenInclude(ui => ui.Instrument)
-            .Include(u => u.Bands)
             .Include(u => u.SocialLinks)
             .Include(u => u.Location)
             .FirstOrDefaultAsync(au => au.Id == userId && au.IsOnboarded == true);
 
         if (user == null)
         {
-            throw new Exception("no user found");
+            return Result<GetPublicProfileResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "Profile not found.",
+                Type = ErrorType.NotFound,
+            });
         }
 
-        return new GetPublicProfileResponse
+        return Result<GetPublicProfileResponse>.Success(new GetPublicProfileResponse
         {
             Firstname = user.FirstName!,
             LastName = user.LastName!,
@@ -57,7 +62,7 @@ public class GetPublicProfileHandler
                 Name = ui.Instrument!.Name,
                 Id = ui.Instrument.Id,
             }).ToList()
-        };
+        });
 
     }
     

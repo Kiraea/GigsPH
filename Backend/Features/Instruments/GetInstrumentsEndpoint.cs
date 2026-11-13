@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.Instruments;
 
@@ -18,6 +19,6 @@ public class GetInstrumentsEndpoint : ControllerBase
     {
         var response = await _handler.HandleAsync();
 
-        return response;
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

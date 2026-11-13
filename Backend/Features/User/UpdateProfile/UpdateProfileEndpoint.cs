@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Features.User.Onboarding;
 
+using PrjA.Infrastructure;
+
 namespace PrjA.Features.User.UpdateProfile;
 
 
@@ -42,7 +44,7 @@ public class UpdateProfileEndpoint : ControllerBase
         }
         
         var response = await  _handler.HandleAsync(request, userId);
-        return Ok(response);
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
 
     }
 }

@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.User.Onboarding;
 
@@ -39,19 +40,8 @@ public class OnboardingEndpoint: ControllerBase
             return InvalidRequest(validateResult.Errors);
         }
 
-        try
-        {
-            var response = await _handler.HandleAsync(request, userId);
-            return Ok(response);
-        }
-        catch (ValidationException exception)
-        {
-            return InvalidRequest(exception.Errors);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new ProblemDetails { Title = "User not found." });
-        }
+        var response = await _handler.HandleAsync(request, userId);
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 
     private ActionResult InvalidRequest(IEnumerable<ValidationFailure> errors)

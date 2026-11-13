@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 
@@ -16,13 +17,19 @@ public class CreateBandEndpointHandler
 
     }
 
-    public async Task<CreateBandResponse> HandleAsync(CreateBandRequest request, string userId)
+    public async Task<Result<CreateBandResponse>> HandleAsync(CreateBandRequest request, string userId)
     {
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            throw new Exception("user does not exist");
+            return Result<CreateBandResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "User not found",
+                Type = ErrorType.NotFound,
+            });
+
         }
 
         //await _dbContext.Entry(user).Collection((u) => u.UserBands).LoadAsync();
@@ -32,7 +39,13 @@ public class CreateBandEndpointHandler
 
         if (bandExist)
         {
-            throw new Exception("band name already exists");
+            return Result<CreateBandResponse>.Failure(new Error
+            {
+                Code = "Band.AlreadyExists",
+                Message = "Band with the same name already exists",
+                Type = ErrorType.BadRequest,
+            });
+
         }
 
         var band = new Band()
@@ -54,13 +67,13 @@ public class CreateBandEndpointHandler
         
         await _dbContext.SaveChangesAsync();
 
-        return new CreateBandResponse()
+        return Result<CreateBandResponse>.Success(new CreateBandResponse()
         {
             Id = band.Id,
             Name = band.Name,
             description = band.Description
-        };
-        
+        });
+
 
 
 

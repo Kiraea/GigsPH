@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
+using PrjA.Infrastructure;
+
 namespace PrjA.Features.User.GetPublicProfile;
 
 
@@ -12,15 +14,15 @@ public class GetPublicProfileEndpoint: ControllerBase
     private readonly GetPublicProfileHandler _handler;
     public GetPublicProfileEndpoint(GetPublicProfileHandler handler)
     {
-        _handler = _handler;
+        _handler = handler;
     }
 
     [HttpGet("{userId}/profile")]
     public async Task<ActionResult<GetPublicProfileResponse>> GetPublicProfile(string userId)
     {
 
-        var response = _handler.HandleAsync(userId);
+        var response = await _handler.HandleAsync(userId);
 
-        return Ok(response);
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

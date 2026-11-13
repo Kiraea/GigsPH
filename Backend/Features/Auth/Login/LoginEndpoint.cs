@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Common;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.Auth.Login;
 
@@ -35,26 +37,23 @@ public class LoginEndpoint : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var response = await _handler.HandleAsync(request);
-            Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions()
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
-            });
 
-            return Ok(response);
-        }
-        catch (InvalidCredentialsException exception)
+        var response = await _handler.HandleAsync(request);
+        if (!response.isSuccess)
         {
-            return Unauthorized(new ProblemDetails
-            {
-                Status = StatusCodes.Status401Unauthorized,
-                Title = exception.Message
-            });
+            return response.ToProblemDetails(this);
         }
+
+        Response.Cookies.Append("access_token", response.Value!.AccessToken, new CookieOptions()
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
+        });
+
+        return Ok(response.Value);
+        
+
 
     }
     

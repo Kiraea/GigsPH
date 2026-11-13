@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 
@@ -16,7 +17,7 @@ public class AcceptInvitationHandler
         _userManager = userManager;
     }
 
-    public async Task<AcceptInvitationResponse> HandleAsync(
+    public async Task<Result<AcceptInvitationResponse>> HandleAsync(
         AcceptInvitationRequest request, string userId)
     {
 
@@ -24,7 +25,12 @@ public class AcceptInvitationHandler
 
         if (user == null)
         {
-            throw new Exception("User not found");
+            return Result<AcceptInvitationResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "User not found",
+                Type = ErrorType.NotFound,
+            });
         }
         
         await _dbContext.Entry(user).Collection(au => au.UserBands).LoadAsync();
@@ -33,19 +39,35 @@ public class AcceptInvitationHandler
         
         if (invitation == null)
         {
-            throw new Exception("Invitation not found");
+            return Result<AcceptInvitationResponse>.Failure(new Error
+            {
+                Code = "Band_Invitation.NotFound",
+                Message = "Band invitation not found",
+                Type = ErrorType.NotFound,
+            });
+
         }
 
         if (invitation.Status != InvitationStatus.Pending)
         {
-            throw new Exception("Invitation is not processed as its not pending");
+            return Result<AcceptInvitationResponse>.Failure(new Error
+            {
+                Code = "Band_Invitation.NotPending",
+                Message = "Band Invitation is no longer pending",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         // check if he already part of the band
         var isInBand = await _dbContext.UserBands.Include(ub => ub.Band).AnyAsync(b => b.UserId == user.Id && b.BandId == invitation.BandId);
         if (isInBand)
         {
-            throw new Exception("already part of band");
+            return Result<AcceptInvitationResponse>.Failure(new Error
+            {
+                Code = "Band.AlreadyMember",
+                Message = "Already in this specific Band",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         /*
@@ -55,7 +77,12 @@ public class AcceptInvitationHandler
          */
         if (request.Status != InvitationStatus.Accepted && request.Status != InvitationStatus.Rejected)
         {
-            throw new Exception("request Status must be accepted or rejected");
+            return Result<AcceptInvitationResponse>.Failure(new Error
+            {
+                Code = "Band_Invitation.InvalidStatus",
+                Message = "Status should be Accepted or Rejected",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         if (request.Status ==  InvitationStatus.Accepted)
@@ -81,12 +108,12 @@ public class AcceptInvitationHandler
         
         await _dbContext.SaveChangesAsync();
 
-        return new AcceptInvitationResponse()
+        return Result<AcceptInvitationResponse>.Success(new AcceptInvitationResponse()
         {
             InvitationId = invitation.Id,
             BandId = invitation.BandId,
             Status = invitation.Status,
-        };
+        });
 
 
 

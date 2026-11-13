@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
-using FluentValidation;
-using FluentValidation.Results;
+using PrjA.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace PrjA.Features.User.Onboarding;
@@ -17,12 +16,17 @@ public class OnboardingHandler
         _userManager = userManager;
         _dbContext = dbContext;
     }
-    public async Task<OnboardingResponse> HandleAsync(OnboardingRequest request, string userId)
+    public async Task<Result<OnboardingResponse>> HandleAsync(OnboardingRequest request, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            throw new KeyNotFoundException("User not found.");
+            return Result<OnboardingResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "User not found.",
+                Type = ErrorType.NotFound,
+            });
         }
         
         user.FirstName = request.FirstName.Trim();
@@ -33,9 +37,11 @@ public class OnboardingHandler
 
         if (user.IsOnboarded)
         {
-            throw new ValidationException(new[]
+            return Result<OnboardingResponse>.Failure(new Error
             {
-                new ValidationFailure("Onboarding", "Onboarding already completed."),
+                Code = "Onboarding.AlreadyCompleted",
+                Message = "Onboarding already completed.",
+                Type = ErrorType.BadRequest,
             });
         }
 
@@ -48,7 +54,12 @@ public class OnboardingHandler
 
         if (genres.Count != request.GenreIds.Count())
         {
-            throw new Exception("Some Genres are not found");
+            return Result<OnboardingResponse>.Failure(new Error
+            {
+                Code = "Genre.InvalidSelection",
+                Message = "One or more selected genres do not exist or are repeated.",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         foreach (var genre in genres)
@@ -64,8 +75,12 @@ public class OnboardingHandler
 
         if (existingInstruments.Count != instrumentIds.Count())
         {
-            throw new ValidationException(
-                "One or more selected instruments do not exist.");
+            return Result<OnboardingResponse>.Failure(new Error
+            {
+                Code = "Instrument.InvalidSelection",
+                Message = "One or more selected instruments do not exist or are repeated.",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         foreach (var instrument in request.Instruments)
@@ -114,12 +129,12 @@ public class OnboardingHandler
 
         
         await _dbContext.SaveChangesAsync();
-        return new OnboardingResponse()
+        return Result<OnboardingResponse>.Success(new OnboardingResponse()
         {
             Id = user.Id,
             IsOnboarded = true,
             DisplayName = user.DisplayName
-        };
+        });
     }
  
 }

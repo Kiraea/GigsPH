@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.Metrics;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
+using PrjA.Common;
 
 namespace PrjA.Features.User.UpdateProfile;
 
@@ -16,7 +17,7 @@ public class UpdateProfileHandler
         _dbContext = dbContext;
     }
 
-    public async Task<UpdateProfileResponse> HandleAsync(UpdateProfileRequest request, string userId)
+    public async Task<Result<UpdateProfileResponse>> HandleAsync(UpdateProfileRequest request, string userId)
     {
 
         var user = await _userManager.FindByIdAsync(userId);
@@ -25,12 +26,22 @@ public class UpdateProfileHandler
         
         if (user == null)
         {
-            throw new Exception("User not found");
+            return Result<UpdateProfileResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "User not found.",
+                Type = ErrorType.NotFound,
+            });
         }
 
         if (!user.IsOnboarded)
         {
-            throw new Exception("Need to be onboarded first");
+            return Result<UpdateProfileResponse>.Failure(new Error
+            {
+                Code = "User.NotOnboarded",
+                Message = "Complete onboarding before updating your profile.",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         await _dbContext.Entry(user).Collection(u => u.Genres).LoadAsync();
@@ -53,7 +64,12 @@ public class UpdateProfileHandler
 
             if (genres.Count != genreIds.Count)
             {
-                throw new Exception("Genre count does not match");
+                return Result<UpdateProfileResponse>.Failure(new Error
+                {
+                    Code = "Genre.InvalidSelection",
+                    Message = "One or more selected genres do not exist.",
+                    Type = ErrorType.BadRequest,
+                });
             }
 
             
@@ -73,14 +89,24 @@ public class UpdateProfileHandler
             
             if (instrumentsId.Distinct().Count() != instrumentsId.Count)
             {
-                throw new Exception("cannot repeat same instrument");
+                return Result<UpdateProfileResponse>.Failure(new Error
+                {
+                    Code = "Instrument.DuplicateSelection",
+                    Message = "The same instrument cannot be selected more than once.",
+                    Type = ErrorType.BadRequest,
+                });
             }
             
             
             var instruments = await _dbContext.Instruments.Where(i => instrumentsId.Contains(i.Id)).ToListAsync();
             if (instruments.Count != instrumentsId.Count)
             {
-                throw new Exception("Instrument count does not match");
+                return Result<UpdateProfileResponse>.Failure(new Error
+                {
+                    Code = "Instrument.InvalidSelection",
+                    Message = "One or more selected instruments do not exist.",
+                    Type = ErrorType.BadRequest,
+                });
             }
 
             var updatedSelections = new List<UserInstrument>();
@@ -148,12 +174,17 @@ public class UpdateProfileHandler
         }
         if (string.IsNullOrWhiteSpace(user.DisplayName))
         {
-            throw new Exception("Profile display name is missing.");
+            return Result<UpdateProfileResponse>.Failure(new Error
+            {
+                Code = "User.DisplayNameRequired",
+                Message = "Profile display name is required.",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         await _dbContext.SaveChangesAsync();
 
-        return new UpdateProfileResponse()
+        return Result<UpdateProfileResponse>.Success(new UpdateProfileResponse()
         {
             Id = user.Id,
             DisplayName = user.DisplayName!,
@@ -182,7 +213,7 @@ public class UpdateProfileHandler
                 City = user.Location.City,
             },
             IsOnboarded = user.IsOnboarded,
-        };
+        });
 
     }
 }

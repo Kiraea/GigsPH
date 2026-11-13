@@ -1,5 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon;
+using Amazon.S3;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -15,6 +17,13 @@ using PrjA.Features.Bands.SendInvitation;
 using PrjA.Features.Bands.UpdateBandMemberRole;
 using PrjA.Features.Genres;
 using PrjA.Features.Instruments;
+using PrjA.Features.Posts.CreatePost;
+using PrjA.Features.Posts.DeletePost;
+using PrjA.Features.Posts.UpdatePost;
+using PrjA.Features.Posts.GetPublicPosts;
+using PrjA.Features.Posts.SetLikeStatusPost;
+using PrjA.Features.Posts.GetPost;
+using PrjA.Features.Uploads;
 using PrjA.Features.User.GetPublicProfile;
 using PrjA.Features.User.Onboarding;
 using PrjA.Features.User.UpdateProfile;
@@ -36,6 +45,8 @@ builder.Services.AddOpenApi();
 
 builder.Configuration.AddJsonFile("appsettings.Custom.json", false, true);
 
+
+
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -43,6 +54,47 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+
+builder.Services.Configure<AWSOptions>(builder.Configuration.GetSection("AWS"));
+
+
+// amazozn doesnt recommend putting the creds on the return amazonclientS3 should be in ~/.aws.credentials
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+
+    if (string.IsNullOrEmpty(builder.Configuration["AWS:ServiceUrl"]) ||
+        string.IsNullOrEmpty(builder.Configuration["AWS:Region"]))
+    {
+        throw new Exception("invalid AWS creds");
+    }
+
+    var s3Config = new AmazonS3Config()
+    {
+        ServiceURL = builder.Configuration["AWS:ServiceUrl"],
+        AuthenticationRegion = builder.Configuration["AWS:Region"],
+        ForcePathStyle = true,
+        // force path style isbasically http://localhost:4566/(bucket)/(objectkey)
+        // if not then http://(bucket).(localhost):/4566/(objectkey)
+    };
+    return new AmazonS3Client(s3Config);
+});
+builder.Services.AddSingleton<S3MediaStorage>(sp =>
+{
+    var s3Client = sp.GetRequiredService<IAmazonS3>();
+    
+    var bucketName =  builder.Configuration["S3:BucketName"];
+    if (string.IsNullOrWhiteSpace(bucketName))
+    {
+        throw new Exception("bucket name is empty");
+    }
+    return new S3MediaStorage(s3Client, bucketName);
+});
+
+// This is for wrapper since we are making a Service
+
+
+
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
@@ -90,6 +142,13 @@ builder.Services.AddScoped<OnboardingHandler>();
 builder.Services.AddScoped<SendInvitationHandler>();
 builder.Services.AddScoped<LeaveBandHandler>();
 builder.Services.AddScoped<UpdateBandMemberRoleHandler>();
+builder.Services.AddScoped<CreatePostHandler>();
+builder.Services.AddScoped<DeletePostHandler>();
+builder.Services.AddScoped<UpdatePostHandler>();
+builder.Services.AddScoped<GetPublicPostsHandler>();
+builder.Services.AddScoped<SetLikeStatusPostHandler>();
+builder.Services.AddScoped<GetPostHandler>();
+builder.Services.AddScoped<UploadHandler>();
 
 
 

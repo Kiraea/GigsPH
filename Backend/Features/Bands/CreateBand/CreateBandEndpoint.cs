@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.Bands.CreateBand;
 
@@ -39,9 +40,8 @@ public class CreateBandEndpoint : ControllerBase
         }
         
         var response = await _handler.HandleAsync(request, userId);
-        
-        return Ok(response);
-        
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
+
     }
     
 }

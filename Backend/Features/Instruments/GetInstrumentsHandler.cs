@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PrjA.Infrastructure;
+using PrjA.Common;
 
 namespace PrjA.Features.Instruments;
 
@@ -12,17 +13,17 @@ public class GetInstrumentsHandler
         _dbContext = dbContext;
     }
 
-    public async Task<List<GetInstrumentsResponse>> HandleAsync()
+    public async Task<Result<List<GetInstrumentsResponse>>> HandleAsync()
     {
         var result = await _dbContext.Instruments.AsNoTracking().ToListAsync();
 
-        return
+        return Result<List<GetInstrumentsResponse>>.Success(
         [
             .. result.Select((i) => new GetInstrumentsResponse
             {
                 Id = i.Id,
                 Name = i.Name,
             })
-        ];
+        ]);
     }
 }

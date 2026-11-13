@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 using PrjA.Infrastructure.Email;
@@ -20,28 +21,43 @@ public class SendInvitationHandler
         _emailSender = emailSender;
     }
 
-    public async Task<SendInvitationResponse> HandleAsync(SendInvitationRequest request, string userId)
+    public async Task<Result<SendInvitationResponse>> HandleAsync(SendInvitationRequest request, string userId)
     {
 
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            throw new Exception("user not found");
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "User.NotFound",
+                Message = "User not found",
+                Type = ErrorType.NotFound,
+            });
         }
 
         
         var toUser = await _userManager.FindByIdAsync(request.ToId);
         if (toUser == null)
         {
-            throw new Exception("not found");
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "Band_Invitation.RecipientNotFound",
+                Message = "The user you want to invite was not found.",
+                Type = ErrorType.NotFound,
+            });
         }
         
         var band = await _dbContext.Bands.FirstOrDefaultAsync(b => b.Id == request.BandId);
 
         if (band == null)
         {
-            throw new Exception("band not found");
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "Band.NotFound",
+                Message = "Band not found",
+                Type = ErrorType.NotFound,
+            });
         }
         
         
@@ -62,22 +78,37 @@ public class SendInvitationHandler
         var isLeader = await _dbContext.UserBands.AnyAsync(b => b.UserId == userId && b.BandId == band.Id && b.Role == BandRole.Leader);
         if (!isLeader)
         {
-           throw new Exception("not leader"); 
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "Band.NotLeader",
+                Message = "Only a band leader can send invitations.",
+                Type = ErrorType.Forbidden,
+            });
         }
         
         var alreadyMember = await _dbContext.UserBands.AnyAsync(ub => ub.UserId == toUser.Id && ub.BandId == band.Id);
         if (alreadyMember)
         {
-            throw new Exception("already member");
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "Band.AlreadyMember",
+                Message = "This user is already a member of the band.",
+                Type = ErrorType.BadRequest,
+            });
         }
 
         var alreadyInvited = await _dbContext.BandInvitations.AnyAsync(bi => bi.BandId == request.BandId &&
                                                                              bi.InvitedToUserId == request.ToId
                                                                              && bi.Status == InvitationStatus.Pending);
         
-        if (!alreadyInvited)
+        if (alreadyInvited)
         {
-            throw new Exception("already invited");
+            return Result<SendInvitationResponse>.Failure(new Error
+            {
+                Code = "Band_Invitation.AlreadyPending",
+                Message = "This user already has a pending invitation to the band.",
+                Type = ErrorType.BadRequest,
+            });
         }
           var invitation = new BandInvitation()
         {
@@ -104,13 +135,13 @@ public class SendInvitationHandler
  
         
         await _emailSender.BuildMessage(email).SendEmailAsync();
-        return new SendInvitationResponse()
+        return Result<SendInvitationResponse>.Success(new SendInvitationResponse()
         {
             InvitationId = invitation.Id,
             BandId = band.Id,
             ToId = toUser.Id,
             Status = InvitationStatus.Pending
-        };
+        });
 
     }
 }

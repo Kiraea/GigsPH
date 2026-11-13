@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Infrastructure;
+using PrjA.Common;
 
 namespace PrjA.Features.Genres;
 
@@ -12,20 +13,20 @@ public class GetGenresHandler
         _dbContext = dbContext;
     }
 
-    public async Task<List<GetGenresResponse>> HandleAsync()
+    public async Task<Result<List<GetGenresResponse>>> HandleAsync()
     {
         
         var result = await _dbContext.Genres.AsNoTracking().ToListAsync();
 
 
-        return
+        return Result<List<GetGenresResponse>>.Success(
         [
             .. result.Select((g) => new GetGenresResponse
             {
                 Id = g.Id,
                 Name = g.Name,
             })
-        ];
+        ]);
 
     }
 }

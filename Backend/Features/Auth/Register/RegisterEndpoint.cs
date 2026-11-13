@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Common;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.Auth.Register;
 
@@ -34,21 +36,10 @@ public class RegisterEndpoint  : ControllerBase
 
          return ValidationProblem(ModelState);
       }
-      
-      try
-      {
-         var response = await _handler.HandleAsync(request);
-         return Ok(response);
-      }
-      catch (RegistrationRejectedException exception)
-      {
-         foreach (var error in exception.Errors)
-         {
-            ModelState.AddModelError(error.Code, error.Description);
-         }
 
-         return ValidationProblem(ModelState);
-      }
+      var response = await _handler.HandleAsync(request);
+      return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
+
 
    }
 }

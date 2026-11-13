@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PrjA.Infrastructure;
 
 namespace PrjA.Features.Bands.AcceptInvitation;
 
@@ -42,6 +43,6 @@ public class AcceptInvitationEndpoint : ControllerBase
         }
 
         var response = await _handler.HandleAsync(request, userId);
-        return Ok(response);
+        return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

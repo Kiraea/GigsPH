@@ -17,10 +17,12 @@ public class AppDbContext : IdentityDbContext<AppUser>
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<UserInstrument>().HasKey(x => new {x.AppUserId, x.InstrumentId});
+        modelBuilder.Entity<PostLikes>().HasKey(x => new { x.PostId, x.UserId });
     } 
 
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<BandInvitation> BandInvitations { get; set; }
+    public DbSet<MediaUpload> MediaUploads { get; set; }
     public DbSet<UserBand> UserBands { get; set; }
     public DbSet<UserInstrument> UserInstruments { get; set; }
     public DbSet<Band> Bands { get; set; }
