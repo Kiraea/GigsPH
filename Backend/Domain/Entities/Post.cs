@@ -11,6 +11,11 @@ public class Post
     
     
     
+    public ICollection<Instrument> Instruments { get; set; } = [];
+    public ICollection<Genre> Genres{ get; set; } = [];
+    
+    
+    
     // can only be either 
     public string? UserId { get; set; }
     public Guid? BandId { get; set; }

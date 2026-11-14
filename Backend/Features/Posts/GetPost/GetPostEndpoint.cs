@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Infrastructure;
@@ -20,6 +21,7 @@ public class GetPostEndpoint : ControllerBase
     [HttpGet("{postId:guid}")]
     public async Task<ActionResult<GetPostResponse>> GetPost([FromRoute] GetPostRequest request)
     {
+
         var result = await _validator.ValidateAsync(request);
         if (!result.IsValid)
         {
@@ -31,7 +33,7 @@ public class GetPostEndpoint : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(request, userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

@@ -25,7 +25,11 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<MediaUpload> MediaUploads { get; set; }
     public DbSet<UserBand> UserBands { get; set; }
     public DbSet<UserInstrument> UserInstruments { get; set; }
+    public DbSet<UserScoreGenre> UserScoreGenres { get; set; }
+    public DbSet<UserScoreInstrument> UserScoreInstruments { get; set; }
+    public DbSet<UserScorePublisher> UserScorePublishers { get; set; }
     public DbSet<Band> Bands { get; set; }
+    public DbSet<Post> Posts { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<Instrument> Instruments { get; set; }
     public DbSet<Location> Locations { get; set; }

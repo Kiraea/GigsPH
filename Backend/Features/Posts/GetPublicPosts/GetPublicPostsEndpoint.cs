@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Infrastructure;
 
@@ -18,9 +20,16 @@ public class GetPublicPostsEndpoint : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<GetPublicPostsResponse>> GetPublicPosts([FromQuery] GetPublicPostsRequest request)
     {
-        var result = await _validator.ValidateAsync(request);
+        
+        string userId = null;
+        if (HttpContext.User.Identity.IsAuthenticated == true)
+        {
+            userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+        var result = await _validator.ValidateAsync(request, userId);
         if (!result.IsValid)
         {
             foreach (var error in result.Errors)
