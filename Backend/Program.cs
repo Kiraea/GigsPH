@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Tls;
 using PrjA.Domain.Entities;
 using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
@@ -29,6 +30,7 @@ using PrjA.Features.User.Onboarding;
 using PrjA.Features.User.UpdateProfile;
 using PrjA.Infrastructure;
 using PrjA.Infrastructure.Email;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +96,10 @@ builder.Services.AddSingleton<S3MediaStorage>(sp =>
 // This is for wrapper since we are making a Service
 
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis") ??
+                                  throw new Exception("No Multiplexer Found"))
+);
 
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);

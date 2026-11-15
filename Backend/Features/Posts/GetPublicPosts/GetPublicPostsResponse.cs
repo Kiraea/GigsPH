@@ -1,7 +1,39 @@
+using PrjA.Features.Genres;
+using PrjA.Features.Instruments;
+
 namespace PrjA.Features.Posts.GetPublicPosts;
 
 public class GetPublicPostsResponse
 {
-    // TODO: Add the fields returned by this operation; do not expose EF entities.
+    
+    public ICollection<PostDto> Posts { get; set; } = [];
+    public required string Cursor { get; set; }
+}
+
+public class PostDto
+{
+    public Guid Id { get; set; }
+    public required string Title { get; set; }
+    public string? Description { get; set; }
+    
+    // can only be one
+    public Guid? BandId { get; set; }
+    public string? UserId { get; set; }
+    public string? CreatedByUserId { get; set; }
+    
+    public int LikedCount { get; set; }
+    public bool IsLiked { get; set; }
+
+    public ICollection<PostMediaDto> Media { get; set; } = [];
+    public ICollection<GetGenresResponse> Genres { get; set; } = [];
+    public ICollection<GetInstrumentsResponse> Instruments { get; set; } = [];
+
+}
+
+public class PostMediaDto
+{
+    public Guid Id { get; set; }
+    public required string ContentType{ get; set; }
+    public required string Url { get; set; }
 }
 
