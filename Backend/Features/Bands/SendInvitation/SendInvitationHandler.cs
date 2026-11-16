@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PrjA.Common;
+using PrjA.Domain;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 using PrjA.Infrastructure.Email;

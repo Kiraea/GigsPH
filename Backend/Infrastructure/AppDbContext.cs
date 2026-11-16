@@ -18,7 +18,33 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<UserInstrument>().HasKey(x => new {x.AppUserId, x.InstrumentId});
         modelBuilder.Entity<PostLikes>().HasKey(x => new { x.PostId, x.UserId });
-    } 
+        
+        
+        
+        
+        
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        var entries = ChangeTracker.Entries<ITimestamp>().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified).ToList();
+
+        var now = DateTime.UtcNow;
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Property("CreatedAt").CurrentValue = now;
+                entry.Property("UpdatedAt").CurrentValue = now;
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property("UpdatedAt").CurrentValue = now;
+            }
+        }
+        return await base.SaveChangesAsync(cancellationToken);
+    }
 
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<BandInvitation> BandInvitations { get; set; }

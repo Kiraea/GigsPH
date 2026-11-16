@@ -1,12 +1,14 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class BandInvitation
+public class BandInvitation : ITimestamp
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid BandId { get; set; }
     public required string InvitedByUserId { get; set; }
     public required string InvitedToUserId { get; set; }
-    public InvitationStatus Status { get; set; } 
+    public InvitationStatus Status { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
 
 

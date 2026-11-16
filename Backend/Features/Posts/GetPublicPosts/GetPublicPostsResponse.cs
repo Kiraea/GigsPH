@@ -7,7 +7,7 @@ public class GetPublicPostsResponse
 {
     
     public ICollection<PostDto> Posts { get; set; } = [];
-    public required string Cursor { get; set; }
+    public string? Cursor { get; set; }
 }
 
 public class PostDto
@@ -19,7 +19,7 @@ public class PostDto
     // can only be one
     public Guid? BandId { get; set; }
     public string? UserId { get; set; }
-    public string? CreatedByUserId { get; set; }
+    public required string PublisherName { get; set; }
     
     public int LikedCount { get; set; }
     public bool IsLiked { get; set; }

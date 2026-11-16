@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PrjA.Common;
+using PrjA.Domain;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 

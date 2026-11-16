@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class Post
+public class Post : ITimestamp
 {
     public Guid Id { get; set; }
     public required string Title { get; set; }
@@ -18,6 +18,11 @@ public class Post
     
     // can only be either 
     public string? UserId { get; set; }
+    public AppUser? User { get; set; }
     public Guid? BandId { get; set; }
+    
+    public Band? Band{ get; set; } 
     public required string CreatedByUserId { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

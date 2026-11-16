@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class Band
+public class Band : ITimestamp
 {
     
     public Guid Id { get; set; } = Guid.CreateVersion7();
@@ -9,4 +9,6 @@ public class Band
     
     public ICollection<UserBand>  UserBands { get; set; }
 
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

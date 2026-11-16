@@ -1,4 +1,5 @@
-﻿using PrjA.Domain.Entities;
+﻿using PrjA.Domain;
+using PrjA.Domain.Entities;
 
 namespace PrjA.Features.Bands.CreateBand;
 

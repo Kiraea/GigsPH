@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class SocialLink
+public class SocialLink : ITimestamp
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
 
@@ -34,4 +34,6 @@ So my corrected recommendation is: required ID, nullable navigation, set the ID 
      */
     public required string AppUserId { get; set; } 
     public AppUser AppUser { get; set; } = null!;
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

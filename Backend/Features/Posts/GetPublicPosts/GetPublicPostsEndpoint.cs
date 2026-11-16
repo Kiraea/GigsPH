@@ -24,12 +24,12 @@ public class GetPublicPostsEndpoint : ControllerBase
     public async Task<ActionResult<GetPublicPostsResponse>> GetPublicPosts([FromQuery] GetPublicPostsRequest request)
     {
         
-        string userId = null;
-        if (HttpContext.User.Identity.IsAuthenticated == true)
+        string? userId = null;
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
         {
             userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
-        var result = await _validator.ValidateAsync(request, userId);
+        var result = await _validator.ValidateAsync(request);
         if (!result.IsValid)
         {
             foreach (var error in result.Errors)
@@ -40,7 +40,7 @@ public class GetPublicPostsEndpoint : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request);
+        var response = await _handler.HandleAsync(request, userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

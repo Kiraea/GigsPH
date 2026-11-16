@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class MediaUpload
+public class MediaUpload : ITimestamp
 {
     public Guid Id { get; set; } =  Guid.CreateVersion7();
     
@@ -12,6 +12,8 @@ public class MediaUpload
     public required long Size { get; set; }
     public UploadPurpose Purpose { get; set; }
     public UploadStatus Status { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
 
 public enum UploadStatus

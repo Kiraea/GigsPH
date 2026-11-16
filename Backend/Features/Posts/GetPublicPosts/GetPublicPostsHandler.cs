@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
@@ -42,7 +43,7 @@ public class GetPublicPostsHandler
         GetPublicPostsRequest request, string? userId)
     {
 
-        
+        //edge user sends cursor is ANONYMOUS but logged IN
         var db = _redis.GetDatabase();
         List<Guid>? compatiblePosts = null;
         AppUser? user = null;
@@ -63,25 +64,35 @@ public class GetPublicPostsHandler
                     });
 
                 }
-                // check if theres already another sessionFeed that is not expired 
-                // another check to see if the user has already finished the posts -> a function to append in redis more posts not sure how it would look like specificallydo i reuse buildpersonalizedfeed or create a new function-> 
-                // a function t
-                if()
-                    compatiblePosts = await HelperBuildPersonalizedFeedAsync(user);
+
+                compatiblePosts = await HelperBuildPersonalizedFeedAsync(user, []);
           
             }
             else
             {
-                compatiblePosts = await HelperBuildAnonymousFeedAsync();
+                compatiblePosts = await HelperBuildAnonymousFeedAsync([]);
             }
-        
+            if (compatiblePosts.Count == 0)
+            {
+                return Result<GetPublicPostsResponse>.Success(
+                    new GetPublicPostsResponse
+                    {
+                        Posts = [],
+                        Cursor = null
+                    });
+            }
+
+            var firstBatchIds = compatiblePosts.Take(request.PageSize).ToList();
+            
             var compatiblePostsRedis = compatiblePosts.Select(ps => (RedisValue)ps.ToString()).ToArray();
 
             
             
             
+            
             Guid sessionId = Guid.CreateVersion7();
-            var nextIndex = compatiblePosts.Count() + 1;
+
+            var nextIndex = firstBatchIds.Count;
 
             string cursor = $"{sessionId}:{nextIndex}";
             
@@ -95,12 +106,12 @@ public class GetPublicPostsHandler
             RedisValue ownerValue = userId != null ? user!.Id : "anonymous";
             
             var transaction = db.CreateTransaction();
-            
-            transaction.SetAddAsync(postKey, compatiblePostsRedis);
-            transaction.ListRightPushAsync(ownerKey, ownerValue);
+            // the reason why i need var is this returns a task even though we comittedIt it can still fail on an indnividual level
+            var savePosts = transaction.ListRightPushAsync(postKey, compatiblePostsRedis);
+            var saveOwner = transaction.StringSetAsync(ownerKey, ownerValue);
 
-            transaction.KeyExpireAsync(postKey, new TimeSpan(2, 0, 0));
-            transaction.KeyExpireAsync(ownerKey, new TimeSpan(2, 0, 0));
+            var PostExpire = transaction.KeyExpireAsync(postKey, new TimeSpan(2, 0, 0));
+            var OwnerExpire = transaction.KeyExpireAsync(ownerKey, new TimeSpan(2, 0, 0));
 
 
             bool committed = await transaction.ExecuteAsync();
@@ -109,6 +120,8 @@ public class GetPublicPostsHandler
             {
                 throw new Exception("cannot save feed session in redis");
             }
+
+            await Task.WhenAll(savePosts, saveOwner, PostExpire, OwnerExpire);
             
                 
             //Store REDIS RANKING
@@ -116,19 +129,24 @@ public class GetPublicPostsHandler
                 
                 
             //Make send actual post
-            var sessionPosts = await _dbContext.Posts.Include(p => p.Genres).Include(p => p.Instruments).Include(p => p.MediaUploads).Include(p => p.Likes).Where(p => compatiblePosts.Contains(p.Id)).ToListAsync();
+            var sessionPosts = await _dbContext.Posts.AsNoTracking().Include(p => p.Genres).Include(p => p.Instruments).Include(p => p.MediaUploads).Include(p => p.User).Include(p => p.Likes).Include(p => p.Band).Where(p => firstBatchIds.Contains(p.Id)).ToListAsync();
 
+            var postsById = sessionPosts.ToDictionary(p => p.Id);
+            
+
+            var orderedSessionPosts = firstBatchIds.Where(id => postsById.ContainsKey(id)).Select(id => postsById[id]).ToList();
 
             PostDto[] returnSessionPost =
             [
-                .. sessionPosts.Select(sp => new PostDto()
+                .. orderedSessionPosts.Select(sp => new PostDto()
                 {
                     Id = sp.Id,
                     Title = sp.Title,
                     BandId = sp.BandId,
-                    CreatedByUserId = sp.CreatedByUserId,
                     Description = sp.Description,
-                    IsLiked = sp.Likes.Any(l => l.UserId == user.Id),
+                    UserId = sp.UserId,
+                    PublisherName = (sp.BandId != null ? sp.Band?.Name: sp.User?.DisplayName) ?? throw new InvalidOperationException("Post has no publishername"),
+                    IsLiked = userId != null ? sp.Likes.Any(l => l.UserId == userId) : false,
                     LikedCount = sp.Likes.Count,
                     Genres = sp.Genres.Select(g => new GetGenresResponse
                     {
@@ -140,8 +158,15 @@ public class GetPublicPostsHandler
                         Id = i.Id,
                         Name = i.Name,
                     }).ToList(),
+                    Media = sp.MediaUploads.Select(mu => new PostMediaDto()
+                    {
+                        Id = mu.Id,
+                        ContentType= mu.ContentType,
+                        Url = $"{_mediaBaseUrl}/{mu.ObjectKey}",
+                    }).ToList(),
+                    
 
-                }).Take(10)
+                })
             ];
 
             return Result<GetPublicPostsResponse>.Success(new GetPublicPostsResponse()
@@ -152,14 +177,36 @@ public class GetPublicPostsHandler
         }
         else
         {
+            bool noMoreCandidates = false;
             // returns just cursor
             // construct key first
             // need to figure out if theres next values in the redis and return the next
             // if theres no more candidates in redis (construct an ewone? idk how)
             // if not user verify is cursor bleonging to him
             string[] cursorValues = request.Cursor.Split(':');
+
+            if (cursorValues.Length != 2)
+            {
+                return Result<GetPublicPostsResponse>.Failure(new Error
+                {
+                    Code = "Feed.InvalidCursor",
+                    Message = "The feed position is invalid.",
+                    Type = ErrorType.BadRequest
+                });
+            }
             string FeedSessionId = cursorValues[0];
-            string nextIndex = cursorValues[1];
+            var nextIndex = cursorValues[1];
+
+            if ( !Guid.TryParse(FeedSessionId, out var sessionId) ||
+                sessionId == Guid.Empty || !int.TryParse(nextIndex, out var intIndex) || intIndex < 0)
+            {
+                return Result<GetPublicPostsResponse>.Failure(new Error
+                {
+                    Code = "Feed.InvalidCursor",
+                    Message = "The feed position is invalid.",
+                    Type = ErrorType.BadRequest
+                });
+            }
 
             RedisKey keyPostConstruct = $"feed:{FeedSessionId}:post";
             RedisKey keyOwnerConstruct = $"feed:{FeedSessionId}:owner";
@@ -177,76 +224,199 @@ public class GetPublicPostsHandler
                     Type = ErrorType.BadRequest
                 });
             }
+            var expectedOwner = userId ?? "anonymous";
             
             
             
-            
-            if (owner.ToString() != "anonymous")
+            if (owner.ToString() != expectedOwner)
             {
-                // logged in
-                if (userId != null)
+                return Result<GetPublicPostsResponse>.Failure(new Error
                 {
-                    user = await _userManager.FindByIdAsync(userId);
-                    if (user == null)
-                    {
-                        return Result<GetPublicPostsResponse>.Failure(new Error
-                        {
-                            Code = "User.NotExist",
-                            Message = "User Not Found",
-                            Type = ErrorType.NotFound
-                        });
-
-                    }
-
-                    if (owner.ToString() != user.Id)
-                    {
-                        
-                        return Result<GetPublicPostsResponse>.Failure(new Error
-                        {
-                            Code = "User.Mismatch",
-                            Message = "User Misamtch to request",
-                            Type = ErrorType.BadRequest
-                        });
-                    }
-                }
-                else
-                {
-                    throw new Exception("mismatch between data send and authorization");
-                }
-
+                    Code = "Feed.OwnerMismatch",
+                    Message = "Start a new feed for the current viewer.",
+                    Type = ErrorType.Forbidden
+                });
             }
-            
-            string?[] postIds = db.SetMembers(keyPostConstruct).ToStringArray();
-            if (postIds == null)
+            // Still check whether the authenticated account exists.
+            if (userId != null)
             {
-                throw new("no posts avaialble");
+                user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return Result<GetPublicPostsResponse>.Failure(new Error
+                    {
+                        Code = "User.NotExist",
+                        Message = "User Not Found",
+                        Type = ErrorType.NotFound
+                    });
+                }
+            }
+   
+            
+
+
+            var savedIds = await db.ListRangeAsync(keyPostConstruct, 0, -1);
+            
+            if (savedIds.Length == 0)
+            {
+                return Result<GetPublicPostsResponse>.Failure(new Error
+                {
+                    Code = "Feed.Expired",
+                    Message = "This feed session is unavailable. Start a new feed.",
+                    Type = ErrorType.BadRequest
+                });
             }
 
-            if (!int.TryParse(nextIndex, out var intIndex) ||  intIndex < 0)
+            if (intIndex > savedIds.Length)
             {
                 return Result<GetPublicPostsResponse>.Failure(new Error
                 {
                     Code = "Feed.InvalidCursor",
-                    Message = "The feed position is invalid.",
+                    Message = "The feed position is beyond the saved list.",
                     Type = ErrorType.BadRequest
                 });
             }
+
+            var excludedPostIds = savedIds
+                .Select(value => Guid.Parse(value.ToString()))
+                .ToList();
+
+ 
+            var nextIds= await db.ListRangeAsync(keyPostConstruct, intIndex, request.PageSize + intIndex - 1);
             
-            
-            
-            
+            var batchIds = nextIds.Select(r => Guid.Parse(r.ToString())).ToList();
+            // this means that his requesting more than what is in the sessionlist
+            if ( batchIds.Count  < request.PageSize )
+            {
+                List<Guid> newToBeAppendPosts = [];
+                if (owner.ToString() != "anonymous")
+                {
+                    newToBeAppendPosts = await HelperBuildPersonalizedFeedAsync(user, excludedPostIds);
+                }
+                else
+                {
+                    newToBeAppendPosts = await HelperBuildAnonymousFeedAsync(excludedPostIds);
+                }
+
+                if (newToBeAppendPosts.Count == 0)
+                {
+                    noMoreCandidates = true;
+                }
+                else
+                {
+                    var toRedisAppendPostsId = newToBeAppendPosts.Select(a => (RedisValue)a.ToString()).ToArray();
+
+                
+                    // p1 p2 p3 already   p4 p5 p6 not in
+                    // user requests 5 new tho but no more
+                    // since this is inside if it only happens 1 the append
+                    // so the next request would be empty thjen it would go in the newtobeappendposts .count == 0 so exception if empty now
+                    // so it handles all ithink?
+ 
+                    
+                    
+                    var appendTransaction = db.CreateTransaction();
+
+                    appendTransaction.AddCondition(Condition.KeyExists(keyPostConstruct));
+
+                    
+                    // checking if the owner has expired 
+                    //tldr comparing the value gotten from key vs the owner
+                    appendTransaction.AddCondition(Condition.StringEqual(keyOwnerConstruct, owner));
+                    
+                    // 2 request
+                    // one appends first (savedIds doesnt change)
+                    // but keypostconstruct(values) change already
+                    appendTransaction.AddCondition(Condition.ListLengthEqual(keyPostConstruct, savedIds.Length));
+                    var appendTask = appendTransaction.ListRightPushAsync((RedisKey)keyPostConstruct, toRedisAppendPostsId);
+                    
+                    bool appended = await appendTransaction.ExecuteAsync();
+
+                    if (!appended)
+                    {
+                        return Result<GetPublicPostsResponse>.Failure(new Error
+                        {
+                            Code = "Feed.Retry",
+                            Message = "Retry this request with the same cursor.",
+                            Type = ErrorType.BadRequest
+                        });
+                    }
+                    
+                    await appendTask;
+
+                    
+                    nextIds = await db.ListRangeAsync(keyPostConstruct, intIndex, request.PageSize + intIndex - 1);
+
+                    batchIds = nextIds.Select(i => Guid.Parse(i.ToString())).ToList();
+                }
+            }
             
 
-     
+
+            // redis does not overflow when reading an index that is not supopsed an item on it 
+            int newIndex = intIndex + batchIds.Count;
+
+            var getNewPosts =await _dbContext.Posts.AsNoTracking().Include(p => p.Genres).Include(p => p.Instruments).Include(p=> p.User).Include(p=> p.Band).Include(p => p.MediaUploads).Include(p => p.Likes).Where(p => batchIds.Contains(p.Id)).ToListAsync();
+
+            var postDict = getNewPosts.ToDictionary(p => p.Id);
             
+            var orderedGetNewPosts = batchIds.Where(id => postDict.ContainsKey(id)).Select(id => postDict[id]).ToList();
+            
+            
+            PostDto[] returnSessionPost =
+            [
+                .. orderedGetNewPosts.Select(sp => new PostDto()
+                {
+                    Id = sp.Id,
+                    Title = sp.Title,
+                    BandId = sp.BandId,
+                    Description = sp.Description,
+                    UserId =  sp.UserId,
+                    PublisherName = (sp.BandId != null ? sp.Band?.Name: sp.User?.DisplayName) ?? throw new InvalidOperationException("Post has no publishername"),
+                    IsLiked = userId != null ? sp.Likes.Any(l => l.UserId == userId) : false,
+                    LikedCount = sp.Likes.Count,
+                    Genres = sp.Genres.Select(g => new GetGenresResponse
+                    {
+                        Id = g.Id,
+                        Name = g.Name
+                    }).ToList(),
+                    Instruments = sp.Instruments.Select(i => new GetInstrumentsResponse()
+                    {
+                        Id = i.Id,
+                        Name = i.Name,
+                    }).ToList(),
+                    Media = sp.MediaUploads.Select(mu => new PostMediaDto()
+                    {
+                        Id = mu.Id,
+                        ContentType= mu.ContentType,
+                        Url = $"{_mediaBaseUrl}/{mu.ObjectKey}",
+                    }).ToList(),
+
+                })
+            ];
+            
+            var newCursor = noMoreCandidates ? null :  $"{FeedSessionId}:{newIndex}" ;
+            
+
+            return Result<GetPublicPostsResponse>.Success(new GetPublicPostsResponse()
+            {
+                Posts = returnSessionPost,
+                Cursor = newCursor,
+            });
+
+
         }
         
         
       
     }
 
-    public async Task<List<Guid>>HelperBuildPersonalizedFeedAsync(AppUser user)
+    public async Task<List<Guid>>HelperBuildPersonalizedFeedAsync(AppUser user, List<Guid> excludedPostIds)
     {
+
+        var eligiblePosts = _dbContext.Posts.AsNoTracking().Include(p => p.Genres).Include(p => p.Instruments)
+            .Where(u => !excludedPostIds.Contains(u.Id));
           // genre match mean any thing in the userScore if he watches 1 of the genre then include that genre as an option
             // score doent matter
 
@@ -263,26 +433,33 @@ public class GetPublicPostsHandler
             var maxCandidateGenrePosts = 100;
             var maxCandidatePublisherPosts = 50;
             var maxCandidateInstrumentPosts = 100;
-            
-            
-            var GenrePosts = await _dbContext.Posts.Include(p => p.Genres).Where(p => p.Genres.Any(g => candidateGenreIds.Contains(g.Id)))
+
+
+            var genrePosts = await eligiblePosts.Where(p => p.Genres.Any(g => candidateGenreIds.Contains(g.Id)))
                 .Take(maxCandidateGenrePosts).ToListAsync();
             
             
             
-            var InstrumentPosts = await _dbContext.Posts.Include(i => i.Instruments)
+            var instrumentPosts = await eligiblePosts.Include(i => i.Instruments)
                 .Where(p => p.Instruments.Any(i => candidateInstrumentIds.Contains(i.Id)))
                 .Take(maxCandidateInstrumentPosts).ToListAsync();
             
             
-            var PublisherPosts = await _dbContext.Posts
+            var publisherPosts = await eligiblePosts 
                 .Where(p => (p.UserId != null && candidatePublisherIds.Contains(p.UserId)) ||
                             (p.BandId != null && candidatePublisherIds.Contains(p.BandId.Value.ToString())))
                 .Take(maxCandidatePublisherPosts).ToListAsync();
+
+
+       
+            
+            // things that dont match the interest of the user?
+            // lets make this newly created post
+            var generalPosts = await eligiblePosts.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.Id).Take(100).ToListAsync();
             
             
 
-            var candidatePosts = GenrePosts.Concat(InstrumentPosts).Concat(PublisherPosts).DistinctBy(p => p.Id)
+            var candidatePosts = genrePosts.Concat(instrumentPosts).Concat(publisherPosts).Concat(generalPosts).DistinctBy(p => p.Id)
                 .ToList();
 
 
@@ -317,8 +494,18 @@ public class GetPublicPostsHandler
                     throw new Exception("Post does not have a publisher");
                 }
 
-                double rawPublisherScore = dictionaryPublisherScore.GetValueOrDefault(publisherId );
+                double rawPublisherScore = dictionaryPublisherScore.GetValueOrDefault(publisherId);
                 double totalPublisherScore = rawPublisherScore / (rawPublisherScore + 10);
+                
+                
+                var numOfDays = DateTime.UtcNow - post.CreatedAt;
+                // this is just if server is out of sync
+                var days = Math.Max(0, numOfDays.TotalDays);
+
+                double totalFreshnessScore = 1.0 / (1.0 + days);
+                
+                
+                
                 double totalGenreScore = 0;
                 foreach (var genre in post.Genres)
                 {
@@ -336,26 +523,24 @@ public class GetPublicPostsHandler
                 double totalLabelScore = rawTotalLabelScore / (rawTotalLabelScore + 10);
                 
                 
-                double totalScore = totalLabelCount == 0 ? (totalPublisherScore * 0.35) / 0.35 : ((totalLabelScore * 0.30) + (totalPublisherScore * 0.35)) / .65;
+                double totalScore = totalLabelCount == 0 ? ((totalPublisherScore * 0.35) + (totalFreshnessScore * 0.35)) / 0.7 : ((totalLabelScore * 0.30) + (totalPublisherScore * 0.35) + (totalFreshnessScore * 0.35)) / 1;
 
                 postAndScore.Add((post.Id, totalScore));
             }
 
-            return postAndScore.OrderBy(ps => ps.Score).ThenBy(ps => ps.PostId).Select(ps => ps.PostId).ToList();
+            return postAndScore.OrderByDescending(ps => ps.Score).ThenBy(ps => ps.PostId).Select(ps => ps.PostId).ToList();
     }
     
-    public Task<List<Guid>> HelperBuildAnonymousFeedAsync()
+    public async Task<List<Guid>> HelperBuildAnonymousFeedAsync(List<Guid> excludedPostIds)
     {
-        List<Guid> template =
-        [Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-            Guid.CreateVersion7(),
-        ];
-        // not done
-        return Task.FromResult(template);
+        
+        var postIds = await _dbContext.Posts.AsNoTracking().Where(p => !excludedPostIds.Contains(p.Id)).Select(p => p.Id).Take(200).ToListAsync();
+        var shuffedIds = postIds.ToArray();
+        Random.Shared.Shuffle(shuffedIds);
+        
+
+        return shuffedIds.ToList();
+
     }
 
 }
