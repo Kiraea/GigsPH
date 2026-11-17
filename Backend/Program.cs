@@ -13,9 +13,15 @@ using PrjA.Domain.Entities;
 using PrjA.Features.Auth.CheckToken;
 using PrjA.Features.Auth.Login;
 using PrjA.Features.Auth.Register;
+using PrjA.Features.Conversations.StartDirectConversation;
+using PrjA.Features.Conversations.SendMessage;
+using PrjA.Features.Conversations.GetConversationMessages;
+using PrjA.Features.Conversations.GetConversations;
+using PrjA.Features.Conversations.RespondToDirectRequest;
 using PrjA.Features.Bands.LeaveBand;
 using PrjA.Features.Bands.SendInvitation;
 using PrjA.Features.Bands.UpdateBandMemberRole;
+using PrjA.Features.Conversations.Realtime;
 using PrjA.Features.Genres;
 using PrjA.Features.Instruments;
 using PrjA.Features.Posts.CreatePost;
@@ -44,7 +50,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
+builder.Services.AddSignalR();
 builder.Configuration.AddJsonFile("appsettings.Custom.json", false, true);
 
 
@@ -155,6 +161,11 @@ builder.Services.AddScoped<GetPublicPostsHandler>();
 builder.Services.AddScoped<SetLikeStatusPostHandler>();
 builder.Services.AddScoped<GetPostHandler>();
 builder.Services.AddScoped<UploadHandler>();
+builder.Services.AddScoped<StartDirectConversationHandler>();
+builder.Services.AddScoped<SendMessageHandler>();
+builder.Services.AddScoped<GetConversationMessagesHandler>();
+builder.Services.AddScoped<GetConversationsHandler>();
+builder.Services.AddScoped<RespondToDirectRequestHandler>();
 
 
 
@@ -198,8 +209,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
-
+app.MapHub<Chathub>("/hubs/chat");
 app.UseCors(FrontendCors);
 app.UseAuthorization();
 

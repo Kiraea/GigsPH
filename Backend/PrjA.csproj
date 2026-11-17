@@ -26,6 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Features\Conversations\" />
       <Folder Include="Features\Instruments\" />
     </ItemGroup>
 

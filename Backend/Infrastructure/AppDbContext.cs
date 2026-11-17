@@ -18,11 +18,25 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<UserInstrument>().HasKey(x => new {x.AppUserId, x.InstrumentId});
         modelBuilder.Entity<PostLikes>().HasKey(x => new { x.PostId, x.UserId });
+        modelBuilder.Entity<UserBlock>().HasKey(x =>
+        new {
+            x.BlockerUserId, x.BlockedUserId
+        });
+        
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => m.ClientMessageId)
+            .IsUnique();
+        modelBuilder.Entity<ConversationMember>().HasKey(x => new { x.ConversationId, x.UserId });
+        
+
         
         
         
-        
-        
+
+
+
+
+
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
@@ -49,7 +63,17 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<BandInvitation> BandInvitations { get; set; }
     public DbSet<MediaUpload> MediaUploads { get; set; }
+    
+    
+    
+    public DbSet<UserBlock> UserBlocks { get; set; }
     public DbSet<UserBand> UserBands { get; set; }
+    
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<ConversationMember> ConversationMembers { get; set; }
+    public DbSet<Message> Messages { get; set; }
+
+
     public DbSet<UserInstrument> UserInstruments { get; set; }
     public DbSet<UserScoreGenre> UserScoreGenres { get; set; }
     public DbSet<UserScoreInstrument> UserScoreInstruments { get; set; }
