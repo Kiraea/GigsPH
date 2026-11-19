@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
@@ -28,9 +29,11 @@ public class LeaveBandHandler
                 Type = ErrorType.NotFound,
             });
         }
-        
-        await _dbContext.Entry(user).Collection((u) => u.UserBands).LoadAsync();
-        var userBand = user.UserBands.FirstOrDefault(ub => ub.BandId ==  request.Id);
+
+        var userBand = await _dbContext.UserBands
+            .FirstOrDefaultAsync(ub =>
+                ub.UserId == userId &&
+                ub.BandId == request.Id);
         if (userBand == null)
         {
             return Result<LeaveBandResponse>.Failure(new Error
@@ -41,7 +44,7 @@ public class LeaveBandHandler
             });
         }
         
-        user.UserBands.Remove(userBand);
+        _dbContext.UserBands.Remove(userBand);
         await _dbContext.SaveChangesAsync();
 
         return Result<LeaveBandResponse>.Success(new LeaveBandResponse()

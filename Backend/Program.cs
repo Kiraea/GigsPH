@@ -18,6 +18,15 @@ using PrjA.Features.Conversations.SendMessage;
 using PrjA.Features.Conversations.GetConversationMessages;
 using PrjA.Features.Conversations.GetConversations;
 using PrjA.Features.Conversations.RespondToDirectRequest;
+using PrjA.Features.Conversations.GroupConversation.CreateGroupConversation;
+using PrjA.Features.Conversations.GroupConversation.GetGroupDetails;
+using PrjA.Features.Conversations.GroupConversation.InviteGroupMember;
+using PrjA.Features.Conversations.GroupConversation.GetGroupInvitations;
+using PrjA.Features.Conversations.GroupConversation.RespondToGroupInvitation;
+using PrjA.Features.Conversations.GroupConversation.RemoveGroupMember;
+using PrjA.Features.Conversations.GroupConversation.LeaveGroup;
+using PrjA.Features.Conversations.GroupConversation.UpdateGroup;
+using PrjA.Features.Conversations.GroupConversation.TransferGroupOwnership;
 using PrjA.Features.Bands.LeaveBand;
 using PrjA.Features.Bands.SendInvitation;
 using PrjA.Features.Bands.UpdateBandMemberRole;
@@ -166,6 +175,15 @@ builder.Services.AddScoped<SendMessageHandler>();
 builder.Services.AddScoped<GetConversationMessagesHandler>();
 builder.Services.AddScoped<GetConversationsHandler>();
 builder.Services.AddScoped<RespondToDirectRequestHandler>();
+builder.Services.AddScoped<CreateGroupConversationHandler>();
+builder.Services.AddScoped<GetGroupDetailsHandler>();
+builder.Services.AddScoped<InviteGroupMemberHandler>();
+builder.Services.AddScoped<GetGroupInvitationsHandler>();
+builder.Services.AddScoped<RespondToGroupInvitationHandler>();
+builder.Services.AddScoped<RemoveGroupMemberHandler>();
+builder.Services.AddScoped<LeaveGroupHandler>();
+builder.Services.AddScoped<UpdateGroupHandler>();
+builder.Services.AddScoped<TransferGroupOwnershipHandler>();
 
 
 

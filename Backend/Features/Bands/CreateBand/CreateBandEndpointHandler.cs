@@ -66,21 +66,6 @@ public class CreateBandEndpointHandler
 
         user.UserBands.Add(userBand);
 
-        var conversation = new Conversation()
-        {
-            Id = Guid.CreateVersion7(),
-            Type = ConversationType.Group,
-            Name = band.Name,
-            BandId = band.Id,
-        };
-
-        _dbContext.Conversations.Add(conversation);
-        _dbContext.ConversationMembers.Add(new ConversationMember()
-        {
-            Conversation = conversation,
-            UserId = userId,
-        });
-        
         await _dbContext.SaveChangesAsync();
 
         return Result<CreateBandResponse>.Success(new CreateBandResponse()

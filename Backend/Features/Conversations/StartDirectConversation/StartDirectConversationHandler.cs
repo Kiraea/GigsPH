@@ -113,7 +113,6 @@ public class StartDirectConversationHandler
         var conversation = new Conversation()
         {
             DirectRequestStatus = DirectRequestStatus.Pending,
-            BandId = null,
             InitiatedByUserId = user.Id,
             // if direct chatjust null
             Name = null,

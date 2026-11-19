@@ -98,11 +98,9 @@ public class AcceptInvitationHandler
             user.UserBands.Add(userBand);
             invitation.Status = InvitationStatus.Accepted;
             
-            
         }
         else if (request.Status == InvitationStatus.Rejected)
         {
-            
             invitation.Status = InvitationStatus.Rejected;
         }
         

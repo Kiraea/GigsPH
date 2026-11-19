@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -136,10 +135,9 @@ public class SendMessageHandler
                     "Unsupported direct conversation request status.");
             }
         }
-        else
+        else if (conversation.Type != ConversationType.Group)
         {
-            // Group messaging rules are not implemented yet.
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Unsupported conversation type.");
         }
 
           // edgecase check if 2 messages then count 2 then another count 2  (already exceeds limit)
