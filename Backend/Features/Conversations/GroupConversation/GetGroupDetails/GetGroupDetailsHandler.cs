@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
+using PrjA.Domain;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 
@@ -30,10 +32,37 @@ public class GetGroupDetailsHandler
             });
         }
 
-        // TODO: Require membership in the requested Group conversation.
-        // TODO: Project its name, owner, and accepted members into response DTOs.
-        // TODO: Pending invitees are not members and cannot read group history.
-        throw new NotImplementedException();
+        var groupConversations = await _dbContext.Conversations.Where(m => m.Id == request.ConversationId
+                                                                           && m.Type == ConversationType.Group
+                                                                           && m.ConversationMembers.Any(cm =>
+                                                                               cm.UserId == userId)
+        ).Select(c => new GetGroupDetailsResponse()
+        {
+            ConversationId = request.ConversationId,
+            Name = c.Name,
+            IsOwner = c.OwnerUserId == userId ? true : false,
+            UserGroupChatDetails = c.ConversationMembers.Select(c => new UserGroupChatDetail()
+            {
+                DisplayName = (c.User == null ? null  : c.User.DisplayName) ?? "Unknown user",
+                UserId = c.User.Id,
+
+            }).ToList()
+
+        }).FirstOrDefaultAsync();
+
+        if (groupConversations == null)
+        {
+            return Result<GetGroupDetailsResponse>.Failure(new Error
+            {
+                Code = "Conversation.NotFound",
+                Message = "Group conversation not found.",
+                Type = ErrorType.NotFound,
+            });
+        }
+
+        return Result<GetGroupDetailsResponse>.Success(groupConversations);
+        
+ 
     }
 }
 

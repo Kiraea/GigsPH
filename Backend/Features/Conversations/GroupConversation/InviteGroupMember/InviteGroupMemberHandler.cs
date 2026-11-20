@@ -52,7 +52,7 @@ public class InviteGroupMemberHandler
         var conversationMember = await _dbContext.ConversationMembers.AnyAsync(cm => 
             cm.Conversation.Id == conversationId &&
             cm.UserId == userId
-            && cm.Conversation.InitiatedByUserId == userId
+            && cm.Conversation.OwnerUserId == userId
             // check for group cause it might be a direct chatId
             && cm.Conversation.Type == ConversationType.Group
         );

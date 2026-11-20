@@ -37,6 +37,7 @@ public class CreateGroupConversationHandler
             Type = ConversationType.Group,
             Name = request.Name,
             InitiatedByUserId = userId,
+            OwnerUserId= userId,
         };
 
         var conversationMember = new ConversationMember()
@@ -74,18 +75,12 @@ public class CreateGroupConversationHandler
         _dbContext.GroupChatInvitations.AddRange(invitations);
 
         await _dbContext.SaveChangesAsync();
-        
-        
-        
-        
+        return Result<CreateGroupConversationResponse>.Success(new CreateGroupConversationResponse()
+        {
+            ConversationId = conversation.Id,
+        });
 
 
-        
-        // TODO: Create a Group conversation and record the acting user as its owner and first member.
-        // TODO: Create pending invitations for selected users; do not grant membership before acceptance.
-        // TODO: Validate selected accounts, duplicates, and self-invitations. A two-person group is valid.
-        // TODO: Save the conversation, owner membership, and invitations together.
-        throw new NotImplementedException();
     }
 }
 

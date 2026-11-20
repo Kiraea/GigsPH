@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
+using PrjA.Domain;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 
@@ -30,11 +32,55 @@ public class RemoveGroupMemberHandler
             });
         }
 
-        // TODO: Require the acting user to own this Group conversation.
-        // TODO: Remove only the target membership, preserving the conversation and messages.
-        // TODO: Use LeaveGroup for leaving yourself and TransferGroupOwnership before an owner leaves.
-        // TODO: Removed users must no longer pass membership checks or receive future group-message events.
-        throw new NotImplementedException();
+
+        if (request.MemberUserId == user.Id)
+        {
+            
+            return Result<RemoveGroupMemberResponse>.Failure(new Error
+            {
+                Code = "User.CannotRemoveSelf",
+                Message = "Transfer ownership before leaving the group.",
+                Type = ErrorType.BadRequest,
+            });
+        }
+
+        var hasPermission = await _dbContext.ConversationMembers.AnyAsync(cm =>
+            cm.ConversationId == request.ConversationId && cm.Conversation.OwnerUserId == userId &&
+            cm.UserId == userId && cm.Conversation.Type == ConversationType.Group);
+
+        if (!hasPermission)
+        {
+            return Result<RemoveGroupMemberResponse>.Failure(new Error
+            {
+                Code = "Conversation.CannotRemove",
+                Message = "User Does not have permission to remove member",
+                Type = ErrorType.Forbidden,
+            });
+
+        }
+
+        var conversationMember =
+            await _dbContext.ConversationMembers.FirstOrDefaultAsync(cm => request.MemberUserId == cm.UserId && request.ConversationId == cm.ConversationId);
+        if (conversationMember == null)
+        {
+            return Result<RemoveGroupMemberResponse>.Failure(new Error
+            {
+                Code = "Conversation.User not in group",
+                Message = "Cannot Remove member as user does not exist",
+                Type = ErrorType.NotFound,
+            });
+        }
+        
+        
+        _dbContext.ConversationMembers.Remove(conversationMember);
+        await _dbContext.SaveChangesAsync();
+        return Result<RemoveGroupMemberResponse>.Success(
+            new RemoveGroupMemberResponse
+            {
+                ConversationId = conversationMember.ConversationId,
+                RemovedUserId = conversationMember.UserId,
+            });
+
     }
 }
 

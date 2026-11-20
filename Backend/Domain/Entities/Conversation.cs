@@ -10,6 +10,7 @@ public class Conversation : ITimestamp
     public DateTime CreatedAt { get; set; }
     
     public string? InitiatedByUserId { get; set; }
+    public string? OwnerUserId { get; set; }
     public DirectRequestStatus? DirectRequestStatus { get; set; }
 
     public ICollection<Message> Messages { get; set; } = [];

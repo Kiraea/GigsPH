@@ -17,7 +17,7 @@ public class RespondToDirectRequestEndpoint : ControllerBase
     private readonly IValidator<RespondToDirectRequestRequest> _validator;
 
     public RespondToDirectRequestEndpoint(
-        RespondToDirectRequestHandler handler, IValidator<RespondToDirectRequestRequest> validator,)
+        RespondToDirectRequestHandler handler, IValidator<RespondToDirectRequestRequest> validator)
     {
         _handler = handler;
         _validator = validator;

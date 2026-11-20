@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
+using PrjA.Domain;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
 
@@ -30,10 +32,45 @@ public class LeaveGroupHandler
             });
         }
 
-        // TODO: Require membership in the requested Group conversation.
-        // TODO: Require an owner to transfer ownership before leaving; last-owner/group-deletion behavior remains undecided.
-        // TODO: Remove the acting user's membership only; preserve other members and messages.
-        throw new NotImplementedException();
+        var conversationMember = await _dbContext.ConversationMembers.Where(cm =>
+            cm.ConversationId == request.ConversationId && user.Id == cm.UserId &&
+            cm.Conversation != null && cm.Conversation.Type == ConversationType.Group).FirstOrDefaultAsync();
+
+        if (conversationMember == null)
+        {
+            
+            return Result<LeaveGroupResponse>.Failure(new Error
+            {
+                Code = "Conversation.Notfound",
+                Message = "User not in conversation",
+                Type = ErrorType.NotFound,
+            });
+        }
+
+        var isOwner =
+            await _dbContext.Conversations.AnyAsync(c => c.Id == request.ConversationId 
+                                                         && c.OwnerUserId == user.Id);
+        
+        if (isOwner)
+        {
+            
+            return Result<LeaveGroupResponse>.Failure(new Error
+            {
+                Code = "Conversation.Invalid",
+                Message = "User must transfer ownership first",
+                Type = ErrorType.BadRequest,
+            });
+        }
+        
+        _dbContext.ConversationMembers.Remove(conversationMember);
+        await _dbContext.SaveChangesAsync();
+        
+        return Result<LeaveGroupResponse>.Success(new LeaveGroupResponse
+        {
+            ConversationId = conversationMember.ConversationId,
+        });
+        
+
     }
 }
 

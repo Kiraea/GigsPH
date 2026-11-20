@@ -29,11 +29,43 @@ public class UpdateGroupHandler
                 Type = ErrorType.NotFound,
             });
         }
+        
+        var conversation = await _dbContext.Conversations.FirstOrDefaultAsync(c =>
+            c.Id == conversationId &&
+            c.Type == ConversationType.Group &&
+            c.ConversationMembers.Any(cm => cm.UserId == userId));
 
-        // TODO: Require the acting user to own this Group conversation.
-        // TODO: Update the group name and return the saved values.
-        // TODO: Name length limits and realtime group-detail notifications remain to be designed.
-        throw new NotImplementedException();
+        if (conversation == null)
+        {
+            return Result<UpdateGroupResponse>.Failure(new Error
+            {
+                Code = "Conversation.NotFound",
+                Message = "Group conversation not found.",
+                Type = ErrorType.NotFound,
+            });
+        }
+
+        if (conversation.OwnerUserId != userId)
+        {
+            return Result<UpdateGroupResponse>.Failure(new Error
+            {
+                Code = "Conversation.Forbidden",
+                Message = "Only the group owner can rename this group.",
+                Type = ErrorType.Forbidden,
+            });
+        }
+
+        var name = request.Name.Trim();
+        conversation.Name = name;
+        await _dbContext.SaveChangesAsync();
+
+        return Result<UpdateGroupResponse>.Success(new UpdateGroupResponse
+        {
+            ConversationId = conversation.Id,
+            Name = name,
+        });
+
+
     }
 }
 
