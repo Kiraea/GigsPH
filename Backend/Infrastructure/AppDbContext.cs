@@ -74,6 +74,13 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Message> Messages { get; set; }
     public DbSet<GroupChatInvitation> GroupChatInvitations{ get; set; }
 
+    
+    
+    public DbSet<MusicListing> MusicListings { get; set; }
+    public DbSet<MusicListingSlot > MusicListingSlots { get; set; }
+    public DbSet<MusicListingApplication> MusicListingApplications { get; set; }
+    
+    
 
     public DbSet<UserInstrument> UserInstruments { get; set; }
     public DbSet<UserScoreGenre> UserScoreGenres { get; set; }

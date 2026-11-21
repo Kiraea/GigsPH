@@ -39,6 +39,13 @@ using PrjA.Features.Posts.UpdatePost;
 using PrjA.Features.Posts.GetPublicPosts;
 using PrjA.Features.Posts.SetLikeStatusPost;
 using PrjA.Features.Posts.GetPost;
+using PrjA.Features.MusicListings.CreateMusicListing;
+using PrjA.Features.MusicListings.GetMusicListings;
+using PrjA.Features.MusicListings.GetMusicListing;
+using PrjA.Features.MusicListings.ApplyToMusicListingSlot;
+using PrjA.Features.MusicListings.GetMusicListingApplications;
+using PrjA.Features.MusicListings.AcceptMusicListingApplicant;
+using PrjA.Features.MusicListings.CancelMusicListingApplication;
 using PrjA.Features.Uploads;
 using PrjA.Features.User.GetPublicProfile;
 using PrjA.Features.User.Onboarding;
@@ -184,6 +191,13 @@ builder.Services.AddScoped<RemoveGroupMemberHandler>();
 builder.Services.AddScoped<LeaveGroupHandler>();
 builder.Services.AddScoped<UpdateGroupHandler>();
 builder.Services.AddScoped<TransferGroupOwnershipHandler>();
+builder.Services.AddScoped<CreateMusicListingHandler>();
+builder.Services.AddScoped<GetMusicListingsHandler>();
+builder.Services.AddScoped<GetMusicListingHandler>();
+builder.Services.AddScoped<ApplyToMusicListingSlotHandler>();
+builder.Services.AddScoped<GetMusicListingApplicationsHandler>();
+builder.Services.AddScoped<AcceptMusicListingApplicantHandler>();
+builder.Services.AddScoped<CancelMusicListingApplicationHandler>();
 
 
 

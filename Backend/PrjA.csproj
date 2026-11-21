@@ -28,6 +28,7 @@
     <ItemGroup>
       <Folder Include="Features\Conversations\GroupConversation\" />
       <Folder Include="Features\Instruments\" />
+      <Folder Include="Features\MusicListings\" />
     </ItemGroup>
 
 
