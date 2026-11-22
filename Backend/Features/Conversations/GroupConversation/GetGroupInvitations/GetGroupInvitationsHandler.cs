@@ -38,7 +38,7 @@ public class GetGroupInvitationsHandler
                           gci.Conversation != null)
             .Select(gci => new GetGroupInvitationResponse
             {
-                InvitationId = gci.id,
+                InvitationId = gci.Id,
                 GroupName = gci.Conversation!.Name ?? "Group Chat",
             })
             .ToListAsync();

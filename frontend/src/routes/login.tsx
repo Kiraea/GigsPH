@@ -3,7 +3,6 @@ import { type LoginRequest, useLogin } from '#/queries/authQueries.ts'
 import { type SubmitEvent, useContext } from 'react'
 import { AuthContext, type UserType } from '#/contexts/authContext.tsx'
 import { axiosInstance } from '#/axiosInstance.tsx'
-import axios from 'axios'
 export const Route = createFileRoute('/login')({
     component: LoginPage,
 })

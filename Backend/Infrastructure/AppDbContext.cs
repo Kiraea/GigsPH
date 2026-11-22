@@ -14,28 +14,10 @@ public class AppDbContext : IdentityDbContext<AppUser>
     //onModelCreating
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<UserInstrument>().HasKey(x => new {x.AppUserId, x.InstrumentId});
-        modelBuilder.Entity<PostLikes>().HasKey(x => new { x.PostId, x.UserId });
-        modelBuilder.Entity<UserBlock>().HasKey(x =>
-        new {
-            x.BlockerUserId, x.BlockedUserId
-        });
         
-        modelBuilder.Entity<Message>()
-            .HasIndex(m => m.ClientMessageId)
-            .IsUnique();
-        modelBuilder.Entity<ConversationMember>().HasKey(x => new { x.ConversationId, x.UserId });
-        
-
-        
-        
-        
-
-
-
-
 
     }
 
@@ -83,9 +65,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
     
 
     public DbSet<UserInstrument> UserInstruments { get; set; }
-    public DbSet<UserScoreGenre> UserScoreGenres { get; set; }
-    public DbSet<UserScoreInstrument> UserScoreInstruments { get; set; }
-    public DbSet<UserScorePublisher> UserScorePublishers { get; set; }
+    public DbSet<UserGenreScore> UserGenreScores { get; set; }
+    public DbSet<UserInstrumentScore> UserInstrumentScores { get; set; }
+    public DbSet<UserPublisherScore> UserPublisherScores { get; set; }
     public DbSet<Band> Bands { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Genre> Genres { get; set; }

@@ -123,7 +123,7 @@ public class InviteGroupMemberHandler
         return Result<InviteGroupMemberResponse>.Success(new InviteGroupMemberResponse()
         {
             ConversationId = conversationId,
-            InvitationId = invitation.id,
+            InvitationId = invitation.Id,
         });
     }
 }

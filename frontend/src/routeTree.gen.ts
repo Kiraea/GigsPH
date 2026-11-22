@@ -10,26 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as DemoUploadRouteImport } from './routes/demoUpload'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AppAuthenticatedRouteImport } from './routes/_app/_authenticated'
+import { Route as AppBandsRouteImport } from './routes/_app/bands'
+import { Route as AppDiscoverRouteImport } from './routes/_app/discover'
+import { Route as AppFeedRouteImport } from './routes/_app/feed'
+import { Route as AppMessagesRouteImport } from './routes/_app/messages'
+import { Route as AppMusicListingsRouteImport } from './routes/_app/music-listings'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppAuthenticatedOnboardingRouteImport } from './routes/_app/_authenticated/onboarding'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoUploadRoute = DemoUploadRouteImport.update({
@@ -47,81 +47,136 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => AuthenticatedRoute,
+const AppAuthenticatedRoute = AppAuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBandsRoute = AppBandsRouteImport.update({
+  id: '/bands',
+  path: '/bands',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDiscoverRoute = AppDiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedRoute = AppFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMessagesRoute = AppMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMusicListingsRoute = AppMusicListingsRouteImport.update({
+  id: '/music-listings',
+  path: '/music-listings',
+  getParentRoute: () => AppRoute,
 } as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAuthenticatedOnboardingRoute =
+  AppAuthenticatedOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => AppAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/demoUpload': typeof DemoUploadRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/bands': typeof AppBandsRoute
+  '/discover': typeof AppDiscoverRoute
+  '/feed': typeof AppFeedRoute
+  '/messages': typeof AppMessagesRoute
+  '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/onboarding': typeof AppAuthenticatedOnboardingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/demoUpload': typeof DemoUploadRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/bands': typeof AppBandsRoute
+  '/discover': typeof AppDiscoverRoute
+  '/feed': typeof AppFeedRoute
+  '/messages': typeof AppMessagesRoute
+  '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/onboarding': typeof AppAuthenticatedOnboardingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/about': typeof AboutRoute
+  '/_app': typeof AppRouteWithChildren
   '/demoUpload': typeof DemoUploadRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_app/_authenticated': typeof AppAuthenticatedRouteWithChildren
+  '/_app/bands': typeof AppBandsRoute
+  '/_app/discover': typeof AppDiscoverRoute
+  '/_app/feed': typeof AppFeedRoute
+  '/_app/messages': typeof AppMessagesRoute
+  '/_app/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/_app/_authenticated/onboarding': typeof AppAuthenticatedOnboardingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/demoUpload'
     | '/login'
     | '/register'
-    | '/onboarding'
+    | '/bands'
+    | '/discover'
+    | '/feed'
+    | '/messages'
+    | '/music-listings'
     | '/demo/tanstack-query'
+    | '/onboarding'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/demoUpload'
     | '/login'
     | '/register'
-    | '/onboarding'
+    | '/bands'
+    | '/discover'
+    | '/feed'
+    | '/messages'
+    | '/music-listings'
     | '/demo/tanstack-query'
+    | '/onboarding'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/about'
+    | '/_app'
     | '/demoUpload'
     | '/login'
     | '/register'
-    | '/_authenticated/onboarding'
+    | '/_app/_authenticated'
+    | '/_app/bands'
+    | '/_app/discover'
+    | '/_app/feed'
+    | '/_app/messages'
+    | '/_app/music-listings'
     | '/demo/tanstack-query'
+    | '/_app/_authenticated/onboarding'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AboutRoute: typeof AboutRoute
+  AppRoute: typeof AppRouteWithChildren
   DemoUploadRoute: typeof DemoUploadRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -137,18 +192,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_app': {
+      id: '/_app'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demoUpload': {
@@ -172,12 +220,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/onboarding': {
-      id: '/_authenticated/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_app/_authenticated': {
+      id: '/_app/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppAuthenticatedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bands': {
+      id: '/_app/bands'
+      path: '/bands'
+      fullPath: '/bands'
+      preLoaderRoute: typeof AppBandsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/discover': {
+      id: '/_app/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof AppDiscoverRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/feed': {
+      id: '/_app/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof AppFeedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/messages': {
+      id: '/_app/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/music-listings': {
+      id: '/_app/music-listings'
+      path: '/music-listings'
+      fullPath: '/music-listings'
+      preLoaderRoute: typeof AppMusicListingsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/demo/tanstack-query': {
       id: '/demo/tanstack-query'
@@ -186,25 +269,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/_authenticated/onboarding': {
+      id: '/_app/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AppAuthenticatedOnboardingRouteImport
+      parentRoute: typeof AppAuthenticatedRoute
+    }
   }
 }
 
-interface AuthenticatedRouteChildren {
-  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+interface AppAuthenticatedRouteChildren {
+  AppAuthenticatedOnboardingRoute: typeof AppAuthenticatedOnboardingRoute
 }
 
-const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+const AppAuthenticatedRouteChildren: AppAuthenticatedRouteChildren = {
+  AppAuthenticatedOnboardingRoute: AppAuthenticatedOnboardingRoute,
 }
 
-const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+const AppAuthenticatedRouteWithChildren =
+  AppAuthenticatedRoute._addFileChildren(AppAuthenticatedRouteChildren)
+
+interface AppRouteChildren {
+  AppAuthenticatedRoute: typeof AppAuthenticatedRouteWithChildren
+  AppBandsRoute: typeof AppBandsRoute
+  AppDiscoverRoute: typeof AppDiscoverRoute
+  AppFeedRoute: typeof AppFeedRoute
+  AppMessagesRoute: typeof AppMessagesRoute
+  AppMusicListingsRoute: typeof AppMusicListingsRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAuthenticatedRoute: AppAuthenticatedRouteWithChildren,
+  AppBandsRoute: AppBandsRoute,
+  AppDiscoverRoute: AppDiscoverRoute,
+  AppFeedRoute: AppFeedRoute,
+  AppMessagesRoute: AppMessagesRoute,
+  AppMusicListingsRoute: AppMusicListingsRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AboutRoute: AboutRoute,
+  AppRoute: AppRouteWithChildren,
   DemoUploadRoute: DemoUploadRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,

@@ -3,12 +3,12 @@ import { axiosInstance } from '#/axiosInstance.tsx'
 import { useQuery } from '@tanstack/react-query'
 
 export type GenresOptions = {
-    id: string
+    id: number
     name: string
 }
 
 export type InstrumentOptions = {
-    id: string
+    id: number
     name: string
 }
 export const getGenresOptionsQuery = queryOptions({

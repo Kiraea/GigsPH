@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class UserScorePublisher 
+public class UserPublisherScore
 {
     public required string UserId { get; set; }
     public required string PublisherId { get; set; }

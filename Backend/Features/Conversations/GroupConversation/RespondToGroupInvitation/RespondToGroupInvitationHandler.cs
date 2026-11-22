@@ -34,7 +34,7 @@ public class RespondToGroupInvitationHandler
         
         
         var invitation = await  _dbContext.GroupChatInvitations.FirstOrDefaultAsync(
-            gci => gci.id == invitationId && gci.InvitedToUserId == userId && gci.Status == GroupChatInvitationStatus.Pending);
+            gci => gci.Id == invitationId && gci.InvitedToUserId == userId && gci.Status == GroupChatInvitationStatus.Pending);
         if (invitation == null)
         {
             
@@ -87,7 +87,7 @@ public class RespondToGroupInvitationHandler
         return Result<RespondToGroupInvitationResponse>.Success(
             new RespondToGroupInvitationResponse
             {
-                InvitationId = invitation.id,
+                InvitationId = invitation.Id,
                 ConversationId = request.Accept ? invitation.ConversationId : null,
                 Status = invitation.Status,
             });

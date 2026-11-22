@@ -9,7 +9,7 @@ import {
     getInstrumentOptionsQuery,
     type InstrumentOptions,
 } from '#/queries/OnboardingQueries.ts'
-export const Route = createFileRoute('/_authenticated/onboarding')({
+export const Route = createFileRoute('/_app/_authenticated/onboarding')({
     component: OnboardingPage,
     loader: async ({ context }) => {
         await Promise.all([

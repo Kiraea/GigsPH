@@ -2,7 +2,7 @@
 
 public class GroupChatInvitation
 {
-    public Guid id { get; set; }
+    public Guid Id { get; set; }
     
     public Guid ConversationId { get; set; }
     public Conversation? Conversation { get; set; }

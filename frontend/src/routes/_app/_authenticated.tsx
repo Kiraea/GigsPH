@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 import { AuthContext } from '#/contexts/authContext.tsx'
 import { useContext } from 'react'
 import { Navigate } from '@tanstack/react-router'
-export const Route = createFileRoute('/_authenticated')({
+export const Route = createFileRoute('/_app/_authenticated')({
     component: AuthenticatedLayout,
 })
 

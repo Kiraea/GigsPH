@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class UserScoreGenre 
+public class UserGenreScore
 {
     public required string UserId { get; set; }
     public required Guid GenreId { get; set; }

@@ -164,6 +164,7 @@ public class GetPublicPostsHandler
                         ContentType= mu.ContentType,
                         Url = $"{_mediaBaseUrl}/{mu.ObjectKey}",
                     }).ToList(),
+                    CreatedAt = sp.CreatedAt
                     
 
                 })
@@ -392,6 +393,7 @@ public class GetPublicPostsHandler
                         ContentType= mu.ContentType,
                         Url = $"{_mediaBaseUrl}/{mu.ObjectKey}",
                     }).ToList(),
+                    CreatedAt = sp.CreatedAt,
 
                 })
             ];
@@ -422,13 +424,13 @@ public class GetPublicPostsHandler
 
             // we do constraint no dups at a later so no need to check
             // * genres that users have watch atleast 1 time
-            var candidateGenreIds = await _dbContext.UserScoreGenres.Where(usg => usg.UserId == user.Id && usg.Score > 0 ).Select(usg => usg.GenreId).ToListAsync ();
+            var candidateGenreIds = await _dbContext.UserGenreScores.Where(usg => usg.UserId == user.Id && usg.Score > 0 ).Select(usg => usg.GenreId).ToListAsync ();
             
             
-            var candidateInstrumentIds = await _dbContext.UserScoreInstruments.Where(usg => usg.UserId== user.Id && usg.Score > 0  ).Select(usg => usg.InstrumentId).ToListAsync();
+            var candidateInstrumentIds = await _dbContext.UserInstrumentScores.Where(usg => usg.UserId== user.Id && usg.Score > 0  ).Select(usg => usg.InstrumentId).ToListAsync();
             
             
-            var candidatePublisherIds = await _dbContext.UserScorePublishers.Where(usp => usp.UserId == user.Id  && usp.Score > 0).Select(usg => usg.PublisherId).ToListAsync();
+            var candidatePublisherIds = await _dbContext.UserPublisherScores.Where(usp => usp.UserId == user.Id  && usp.Score > 0).Select(usg => usg.PublisherId).ToListAsync();
 
             var maxCandidateGenrePosts = 100;
             var maxCandidatePublisherPosts = 50;
@@ -467,20 +469,20 @@ public class GetPublicPostsHandler
 
             /* can do this but not perforamnt
              *
-             var publisherScore = _dbContext.UserScorePublishers.Where(usp =>
+             var publisherScore = _dbContext.UserPublisherScores.Where(usp =>
                 (post.UserId != null && usp.PublisherId == post.UserId) ||
                 (post.BandId != null && usp.PublisherId == post.BandId.ToString())).Select(usp => usp.Score).FirstOrDefaultAsync();
              *
              */
 
-            var dictionaryPublisherScore = await _dbContext.UserScorePublishers
+            var dictionaryPublisherScore = await _dbContext.UserPublisherScores
                 .Where(usp => user.Id == usp.UserId && candidatePublisherIds.Contains(usp.PublisherId))
                 .ToDictionaryAsync(d => d.PublisherId, d => d.Score);
 
-            var dictionaryGenreScore = await _dbContext.UserScoreGenres
+            var dictionaryGenreScore = await _dbContext.UserGenreScores
                 .Where(usg => usg.UserId== user.Id && candidateGenreIds.Contains(usg.GenreId))
                 .ToDictionaryAsync(g => g.GenreId, g => g.Score);
-            var dictionaryInstrumentScore = await _dbContext.UserScoreInstruments
+            var dictionaryInstrumentScore = await _dbContext.UserInstrumentScores
                 .Where(usi => usi.UserId== user.Id && candidateInstrumentIds.Contains(usi.InstrumentId))
                 .ToDictionaryAsync(usi => usi.InstrumentId, usi => usi.Score);
             

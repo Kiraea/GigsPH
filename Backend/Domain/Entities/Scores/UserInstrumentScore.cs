@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class UserScoreInstrument 
+public class UserInstrumentScore
 {
     
     public required string UserId { get; set; }

@@ -27,6 +27,7 @@ public class PostDto
     public ICollection<PostMediaDto> Media { get; set; } = [];
     public ICollection<GetGenresResponse> Genres { get; set; } = [];
     public ICollection<GetInstrumentsResponse> Instruments { get; set; } = [];
+    public DateTime CreatedAt { get; set; }
 
 }
 
