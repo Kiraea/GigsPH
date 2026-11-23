@@ -235,16 +235,16 @@ function FeedPage() {
     ]
 
     return (
-        <div className="min-h-screen grid grid-cols-3 bg-[var(--color-backgroundA)]">
+        <div className="min-h-screen grid grid-cols-3 bg-background-high">
             <div className="col-span-2 col-start-1 flex items-center justify-center">
                 <div className="flex flex-col max-w-180 items-center justify-center gap-5">
                     <div className="flex p-5 shadow rounded-2xl w-full items-center ">
                         <div className="flex w-1/10 ">
-                            <div className="h-13 w-13 rounded-full bg-gray-500 p-5 flex items-center justify-center">
+                            <div className="h-13 w-13 rounded-full bg-background-low p-5 flex items-center justify-center">
                                 A
                             </div>
                         </div>
-                        <button className="flex-1 bg-gray-100 rounded-2xl p-2 text-start text-gray-600">
+                        <button className="flex-1 bg-background-medium rounded-2xl p-2 text-start text-foreground-low">
                             Share a clip!
                         </button>
                     </div>
@@ -253,7 +253,7 @@ function FeedPage() {
                     })}
                 </div>
             </div>
-            <div className="col-start-3 bg-backgroundA"></div>
+            <div className="col-start-3 bg-background-high"></div>
         </div>
     )
 }

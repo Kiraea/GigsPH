@@ -123,6 +123,16 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
                                   throw new Exception("No Multiplexer Found"))
 );
 
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = (context) =>
+    {
+        context.ProblemDetails.Extensions.TryAdd("traceId", context.HttpContext.TraceIdentifier);
+
+    };
+});
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
@@ -232,6 +242,10 @@ using (var scope = app.Services.CreateScope())
     await SeedDb.SeedInstrumentsAsync(db);
     await SeedDb.SeedRolesAsync(roleManager);
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -240,11 +254,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(FrontendCors); // below auth and autho
 app.UseAuthentication();
-app.MapHub<Chathub>("/hubs/chat");
-app.UseCors(FrontendCors);
 app.UseAuthorization();
 
+app.MapHub<Chathub>("/hubs/chat");
 app.MapControllers();
 
 app.Run();

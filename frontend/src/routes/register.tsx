@@ -29,11 +29,11 @@ function RegisterPage() {
     return (
         <div className=" min-h-screen flex items-center justify-center border-2px ">
             <div className="grid w-full aspect-[3/1] max-w-4xl grid-cols-2 rounded-2xl overflow-hidden shadow-md">
-                <div className="border-black flex flex-col bg-emerald-400 flex items-center justify-center">
-                    <div className="font-extrabold text-white text-4xl">
+                <div className="border-foreground-high flex flex-col bg-emerald-400 flex items-center justify-center">
+                    <div className="font-extrabold text-fixed-white text-4xl">
                         SessionPH
                     </div>
-                    <div className="text-white font-semibold text-md">
+                    <div className="text-fixed-white font-semibold text-md">
                         Register
                     </div>
                 </div>
@@ -62,9 +62,9 @@ function RegisterPage() {
                             </div>
                             <button
                                 type="submit"
-                                className=" bg-emerald-500 px-4 py-2 whitespace-nowrap font-bold rounded-xl text-white"
+                                className=" bg-emerald-500 px-4 py-2 whitespace-nowrap font-bold rounded-xl text-fixed-white"
                             >
-                                Login
+                                Register
                             </button>
                         </div>
                     </div>

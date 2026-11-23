@@ -1,5 +1,9 @@
-import { createFileRoute, ErrorComponent } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import {
+    createFileRoute,
+    ErrorComponent,
+    useNavigate,
+} from '@tanstack/react-router'
+import { useContext, useEffect, useState } from 'react'
 import { axiosInstance } from '#/axiosInstance.tsx'
 import { QueryClient, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
@@ -8,7 +12,11 @@ import {
     getGenresOptionsQuery,
     getInstrumentOptionsQuery,
     type InstrumentOptions,
+    type OnboardingRequest,
+    type OnboardingResponse,
+    useOnboarding,
 } from '#/queries/OnboardingQueries.ts'
+import { AuthContext } from '#/contexts/authContext.tsx'
 export const Route = createFileRoute('/_app/_authenticated/onboarding')({
     component: OnboardingPage,
     loader: async ({ context }) => {
@@ -76,6 +84,45 @@ type CityOption = {
 }
 
 function OnboardingPage() {
+    const auth = useContext(AuthContext)
+    const navigate = useNavigate()
+    const onboarding = useOnboarding()
+
+    const handleSubmit = () => {
+        const request: OnboardingRequest = {
+            firstName: profile.firstName.trim(),
+            lastName: profile.lastName.trim(),
+            displayName: profile.displayName.trim(),
+            description: profile.description.trim() || null,
+            genreIds: selectedGenres,
+            instruments: selectedInstruments.map((instrument) => ({
+                instrumentId: instrument.id,
+                isMain: instrument.isMain,
+            })),
+            socialLinks: profile.socialLinks,
+            location: {
+                country: profile.location.country.trim(),
+                provinceState: profile.location.provinceState.trim(),
+                city: profile.location.city.trim(),
+            },
+        }
+
+        onboarding.mutate(request, {
+            onSuccess: (response) => {
+                auth?.setUser((prev) => {
+                    return prev
+                        ? {
+                              ...prev,
+                              displayName: response.displayName,
+                              isOnboarded: response.isOnboarded,
+                          }
+                        : prev
+                })
+                navigate({ to: '/feed' })
+            },
+        })
+    }
+
     const step = ['Profile', 'Genres', 'Instruments', 'Review']
     const [currentStep, setCurrentStep] = useState(0)
 
@@ -271,7 +318,7 @@ function OnboardingPage() {
     return (
         <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-col w-1/2 gap-2 ">
-                <div className="flex gap-2 border-black p-5 border-2">
+                <div className="flex gap-2 border-foreground-high p-5 border-2">
                     {step.map((stepName, index) => (
                         <button
                             key={stepName}
@@ -283,7 +330,7 @@ function OnboardingPage() {
                         </button>
                     ))}
                 </div>
-                <div className="flex flex-col border-2 border-black min-h-96 p-6">
+                <div className="flex flex-col border-2 border-foreground-high min-h-96 p-6">
                     {currentStep === 0 && (
                         <>
                             <label>Firstname</label>
@@ -366,8 +413,7 @@ function OnboardingPage() {
                                 list="province-state-options"
                                 type="text"
                                 value={profile.location.provinceState}
-                                onChange={(e) =>
-                                {
+                                onChange={(e) => {
                                     setCityOptions([])
                                     setProfile((previous) => {
                                         return {
@@ -381,8 +427,7 @@ function OnboardingPage() {
                                             },
                                         }
                                     })
-                                }
-                                }
+                                }}
                             />
                             <datalist id="province-state-options">
                                 {provinceStateOptions.map((option) => {
@@ -475,7 +520,7 @@ function OnboardingPage() {
                                                 changeInstrument(
                                                     index,
                                                     e.target.value,
-                                                    false,
+                                                    instrument.isMain,
                                                 )
                                             }
                                         >
@@ -645,6 +690,9 @@ function OnboardingPage() {
                                     )}
                                 </dd>
                             </dl>
+                            <button type="submit" onClick={handleSubmit}>
+                                Submit
+                            </button>
                         </section>
                     )}
                 </div>

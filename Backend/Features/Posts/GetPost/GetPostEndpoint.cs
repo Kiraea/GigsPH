@@ -33,7 +33,7 @@ public class GetPostEndpoint : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request, userId);
+        var response = await _handler.HandleAsync(request);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

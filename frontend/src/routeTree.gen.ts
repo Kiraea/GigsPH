@@ -16,12 +16,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppAuthenticatedRouteImport } from './routes/_app/_authenticated'
 import { Route as AppBandsRouteImport } from './routes/_app/bands'
+import { Route as AppConversationsRouteImport } from './routes/_app/conversations'
 import { Route as AppDiscoverRouteImport } from './routes/_app/discover'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
-import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppMusicListingsRouteImport } from './routes/_app/music-listings'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as AppAuthenticatedOnboardingRouteImport } from './routes/_app/_authenticated/onboarding'
+import { Route as AppConversationsIndexRouteImport } from './routes/_app/conversations/index'
+import { Route as AppConversationsConversationIdRouteImport } from './routes/_app/conversations/$conversationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -56,6 +58,11 @@ const AppBandsRoute = AppBandsRouteImport.update({
   path: '/bands',
   getParentRoute: () => AppRoute,
 } as any)
+const AppConversationsRoute = AppConversationsRouteImport.update({
+  id: '/conversations',
+  path: '/conversations',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDiscoverRoute = AppDiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
@@ -64,11 +71,6 @@ const AppDiscoverRoute = AppDiscoverRouteImport.update({
 const AppFeedRoute = AppFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMessagesRoute = AppMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMusicListingsRoute = AppMusicListingsRouteImport.update({
@@ -87,6 +89,17 @@ const AppAuthenticatedOnboardingRoute =
     path: '/onboarding',
     getParentRoute: () => AppAuthenticatedRoute,
   } as any)
+const AppConversationsIndexRoute = AppConversationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppConversationsRoute,
+} as any)
+const AppConversationsConversationIdRoute =
+  AppConversationsConversationIdRouteImport.update({
+    id: '/$conversationId',
+    path: '/$conversationId',
+    getParentRoute: () => AppConversationsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -94,12 +107,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/bands': typeof AppBandsRoute
+  '/conversations': typeof AppConversationsRouteWithChildren
   '/discover': typeof AppDiscoverRoute
   '/feed': typeof AppFeedRoute
-  '/messages': typeof AppMessagesRoute
   '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/onboarding': typeof AppAuthenticatedOnboardingRoute
+  '/conversations/$conversationId': typeof AppConversationsConversationIdRoute
+  '/conversations/': typeof AppConversationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,10 +124,11 @@ export interface FileRoutesByTo {
   '/bands': typeof AppBandsRoute
   '/discover': typeof AppDiscoverRoute
   '/feed': typeof AppFeedRoute
-  '/messages': typeof AppMessagesRoute
   '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/onboarding': typeof AppAuthenticatedOnboardingRoute
+  '/conversations/$conversationId': typeof AppConversationsConversationIdRoute
+  '/conversations': typeof AppConversationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,12 +139,14 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/_authenticated': typeof AppAuthenticatedRouteWithChildren
   '/_app/bands': typeof AppBandsRoute
+  '/_app/conversations': typeof AppConversationsRouteWithChildren
   '/_app/discover': typeof AppDiscoverRoute
   '/_app/feed': typeof AppFeedRoute
-  '/_app/messages': typeof AppMessagesRoute
   '/_app/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/_app/_authenticated/onboarding': typeof AppAuthenticatedOnboardingRoute
+  '/_app/conversations/$conversationId': typeof AppConversationsConversationIdRoute
+  '/_app/conversations/': typeof AppConversationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -138,12 +156,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/bands'
+    | '/conversations'
     | '/discover'
     | '/feed'
-    | '/messages'
     | '/music-listings'
     | '/demo/tanstack-query'
     | '/onboarding'
+    | '/conversations/$conversationId'
+    | '/conversations/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,10 +173,11 @@ export interface FileRouteTypes {
     | '/bands'
     | '/discover'
     | '/feed'
-    | '/messages'
     | '/music-listings'
     | '/demo/tanstack-query'
     | '/onboarding'
+    | '/conversations/$conversationId'
+    | '/conversations'
   id:
     | '__root__'
     | '/'
@@ -166,12 +187,14 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/_authenticated'
     | '/_app/bands'
+    | '/_app/conversations'
     | '/_app/discover'
     | '/_app/feed'
-    | '/_app/messages'
     | '/_app/music-listings'
     | '/demo/tanstack-query'
     | '/_app/_authenticated/onboarding'
+    | '/_app/conversations/$conversationId'
+    | '/_app/conversations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -234,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBandsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/conversations': {
+      id: '/_app/conversations'
+      path: '/conversations'
+      fullPath: '/conversations'
+      preLoaderRoute: typeof AppConversationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/discover': {
       id: '/_app/discover'
       path: '/discover'
@@ -246,13 +276,6 @@ declare module '@tanstack/react-router' {
       path: '/feed'
       fullPath: '/feed'
       preLoaderRoute: typeof AppFeedRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/messages': {
-      id: '/_app/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof AppMessagesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/music-listings': {
@@ -276,6 +299,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthenticatedOnboardingRouteImport
       parentRoute: typeof AppAuthenticatedRoute
     }
+    '/_app/conversations/': {
+      id: '/_app/conversations/'
+      path: '/'
+      fullPath: '/conversations/'
+      preLoaderRoute: typeof AppConversationsIndexRouteImport
+      parentRoute: typeof AppConversationsRoute
+    }
+    '/_app/conversations/$conversationId': {
+      id: '/_app/conversations/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/conversations/$conversationId'
+      preLoaderRoute: typeof AppConversationsConversationIdRouteImport
+      parentRoute: typeof AppConversationsRoute
+    }
   }
 }
 
@@ -290,21 +327,34 @@ const AppAuthenticatedRouteChildren: AppAuthenticatedRouteChildren = {
 const AppAuthenticatedRouteWithChildren =
   AppAuthenticatedRoute._addFileChildren(AppAuthenticatedRouteChildren)
 
+interface AppConversationsRouteChildren {
+  AppConversationsConversationIdRoute: typeof AppConversationsConversationIdRoute
+  AppConversationsIndexRoute: typeof AppConversationsIndexRoute
+}
+
+const AppConversationsRouteChildren: AppConversationsRouteChildren = {
+  AppConversationsConversationIdRoute: AppConversationsConversationIdRoute,
+  AppConversationsIndexRoute: AppConversationsIndexRoute,
+}
+
+const AppConversationsRouteWithChildren =
+  AppConversationsRoute._addFileChildren(AppConversationsRouteChildren)
+
 interface AppRouteChildren {
   AppAuthenticatedRoute: typeof AppAuthenticatedRouteWithChildren
   AppBandsRoute: typeof AppBandsRoute
+  AppConversationsRoute: typeof AppConversationsRouteWithChildren
   AppDiscoverRoute: typeof AppDiscoverRoute
   AppFeedRoute: typeof AppFeedRoute
-  AppMessagesRoute: typeof AppMessagesRoute
   AppMusicListingsRoute: typeof AppMusicListingsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthenticatedRoute: AppAuthenticatedRouteWithChildren,
   AppBandsRoute: AppBandsRoute,
+  AppConversationsRoute: AppConversationsRouteWithChildren,
   AppDiscoverRoute: AppDiscoverRoute,
   AppFeedRoute: AppFeedRoute,
-  AppMessagesRoute: AppMessagesRoute,
   AppMusicListingsRoute: AppMusicListingsRoute,
 }
 

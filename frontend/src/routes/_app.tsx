@@ -17,15 +17,15 @@ function AppLayout() {
     }
 
     return (
-        <div className="grid-cols-[280px_minmax(0,1fr)] grid min-h-screen bg-[var(--color-backgroundA)]">
-            <nav className="sticky self-start bg-[var(--color-backgroundA)] h-dvh gap-10 top-0 col-start-1 flex-col flex p-3 ">
+        <div className="grid-cols-[280px_minmax(0,1fr)] grid min-h-screen bg-background-high">
+            <nav className="sticky self-start bg-background-high h-dvh gap-10 top-0 col-start-1 flex-col flex p-3 ">
                 <h1 className="text-4xl font-medium">
                     {' '}
                     SessionPH{' '}
                     <img src="/media/logo.png" className="h-10 w-10" />
                 </h1>
 
-                <div className="grid grid-cols-[auto_1fr]  gap-x-3 gap-y-2 w-full font-light text-gray-800 text-md ">
+                <div className="grid grid-cols-[auto_1fr]  gap-x-3 gap-y-2 w-full font-light text-foreground-medium text-md ">
                     <Link
                         to="/feed"
                         className={`${sidebarLinkClass} bg-purple-200`}
@@ -35,7 +35,7 @@ function AppLayout() {
                         </span>
                         <span>Feed</span>
                     </Link>
-                    <Link to="/messages" className={sidebarLinkClass}>
+                    <Link to="/conversations" className={sidebarLinkClass}>
                         <span className="flex items-center gap-2">
                             <MessagesCircle />
                         </span>

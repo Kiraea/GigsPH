@@ -43,6 +43,7 @@ public class UploadEndpoint:ControllerBase
             }
 
             return ValidationProblem(modelStateDictionary);
+            new ValidationProblemDetails()
         }
 
         var result = await _handler.HandleAsync(request, userId);

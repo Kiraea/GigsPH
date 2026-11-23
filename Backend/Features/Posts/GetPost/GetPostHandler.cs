@@ -24,10 +24,10 @@ public class GetPostHandler
     public async Task<Result<GetPostResponse>> HandleAsync(
         GetPostRequest request)
     {
+        throw new NotImplementedException();
 
-        
-        
-        
+
+
     }
 }
 
