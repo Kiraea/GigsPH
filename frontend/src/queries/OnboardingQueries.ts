@@ -13,6 +13,7 @@ export type InstrumentOptions = {
 }
 export const getGenresOptionsQuery = queryOptions({
     queryKey: ['genres'],
+    staleTime: Infinity,
     queryFn: async () => {
         const response = await axiosInstance.get<GenresOptions[]>('/genres')
         return response.data
@@ -21,6 +22,7 @@ export const getGenresOptionsQuery = queryOptions({
 
 export const getInstrumentOptionsQuery = queryOptions({
     queryKey: ['instruments'],
+    staleTime: Infinity,
     queryFn: async () => {
         const response =
             await axiosInstance.get<InstrumentOptions[]>('/instruments')

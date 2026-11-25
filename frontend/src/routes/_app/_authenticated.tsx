@@ -21,6 +21,10 @@ function AuthenticatedLayout() {
         if (!auth?.user.isOnboarded && pathname !== '/onboarding') {
             return <Navigate to="/onboarding" replace />
         }
+
+        if (auth.user && auth.user.isOnboarded && pathname === '/onboarding') {
+            return <Navigate to="/feed" replace />
+        }
     }
     return <Outlet />
 }

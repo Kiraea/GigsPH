@@ -3,6 +3,7 @@ import { type LoginRequest, useLogin } from '#/queries/authQueries.ts'
 import { type SubmitEvent, useContext } from 'react'
 import { AuthContext, type UserType } from '#/contexts/authContext.tsx'
 import { axiosInstance } from '#/axiosInstance.tsx'
+import { getApiErrorMessage } from '#/utils/getApiErrorMessage.ts'
 export const Route = createFileRoute('/login')({
     component: LoginPage,
 })
@@ -75,11 +76,17 @@ function LoginPage() {
                                     </span>
                                 </Link>
                             </div>
+                            {login.isError && (
+                                <p className="text-red-400">
+                                    {getApiErrorMessage(login.error)}
+                                </p>
+                            )}
                             <button
                                 type="submit"
+                                disabled={login.isPending}
                                 className=" bg-emerald-500 px-4 py-2 whitespace-nowrap font-bold rounded-xl text-fixed-white"
                             >
-                                Login
+                                {login.isPending ? 'Logging in...' : 'Login'}
                             </button>
                         </div>
                     </div>

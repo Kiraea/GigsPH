@@ -17,6 +17,8 @@ import {
     useOnboarding,
 } from '#/queries/OnboardingQueries.ts'
 import { AuthContext } from '#/contexts/authContext.tsx'
+import { getApiErrorMessage } from '#/utils/getApiErrorMessage.ts'
+
 export const Route = createFileRoute('/_app/_authenticated/onboarding')({
     component: OnboardingPage,
     loader: async ({ context }) => {
@@ -29,7 +31,10 @@ export const Route = createFileRoute('/_app/_authenticated/onboarding')({
     errorComponent: () => <p>Something went wrong</p>,
 })
 
-type Platform = 'Facebook' | 'Twitter'
+// so its not read as string[] which would be wrong cause no need to push values
+// its readonly now
+const PLATFORMS = ['Facebook', 'Twitter'] as const
+type Platform = (typeof PLATFORMS)[number]
 
 type SocialLink = {
     platform: Platform
@@ -62,12 +67,16 @@ type StateSearchResponse = {
     results?: {
         state?: string
         place_id?: string
+        lat?: number
+        lon?: number
     }[]
 }
 
 type ProvinceStateOption = {
     state: string
     place_id: string
+    lat: number
+    lon: number
 }
 type CityResponse = {
     results?: {
@@ -99,7 +108,12 @@ function OnboardingPage() {
                 instrumentId: instrument.id,
                 isMain: instrument.isMain,
             })),
-            socialLinks: profile.socialLinks,
+            socialLinks: profile.socialLinks
+                .filter((sl) => sl.url.trim() !== '')
+                .map((sl) => ({
+                    platform: sl.platform,
+                    url: sl.url.trim(),
+                })),
             location: {
                 country: profile.location.country.trim(),
                 provinceState: profile.location.provinceState.trim(),
@@ -121,6 +135,33 @@ function OnboardingPage() {
                 navigate({ to: '/feed' })
             },
         })
+    }
+
+    const changeSocialLink = (
+        rowIndex: number,
+        platform: Platform,
+        url: string,
+    ) => {
+        /*
+        setProfile((prev) => {
+            
+            const updated = [...prev.socialLinks]
+            
+            updated[rowIndex] = {platform: platform, url:url}
+            
+            return {
+                ...prev,
+                socialLinks: updated,
+            }
+        })
+        
+         */
+        setProfile((prev) => ({
+            ...prev,
+            socialLinks: prev.socialLinks.map((sl, index) =>
+                index === rowIndex ? { platform: platform, url: url } : sl,
+            ),
+        }))
     }
 
     const step = ['Profile', 'Genres', 'Instruments', 'Review']
@@ -205,7 +246,6 @@ function OnboardingPage() {
                 apiKey: import.meta.env.VITE_GEOAPIFY_API_KEY,
                 format: 'json',
             })
-            console.log(import.meta.env.VITE_GEOAPIFY_API_KEY)
 
             try {
                 const response = await axios.get<StateSearchResponse>(
@@ -217,7 +257,9 @@ function OnboardingPage() {
                         typeof row.state === 'string' &&
                         row.state.length > 0 &&
                         typeof row.place_id === 'string' &&
-                        row.place_id.length > 0,
+                        row.place_id.length > 0 &&
+                        typeof row.lat === 'number' &&
+                        typeof row.lon === 'number',
                 )
 
                 /*
@@ -236,7 +278,7 @@ function OnboardingPage() {
             } catch (e) {
                 console.log(e)
             }
-        }, 2000)
+        }, 400)
 
         return () => {
             clearTimeout(timer)
@@ -266,7 +308,8 @@ function OnboardingPage() {
                 text: text,
                 type: 'city',
                 limit: '5',
-                filter: `place:${provinceObject.place_id}`,
+                filter: `countrycode:ph`,
+                bias: `proximity:${provinceObject.lon},${provinceObject.lat}`,
                 apiKey: import.meta.env.VITE_GEOAPIFY_API_KEY,
                 format: 'json',
             })
@@ -276,6 +319,9 @@ function OnboardingPage() {
                     `https://api.geoapify.com/v1/geocode/autocomplete?${parameters}`,
                 )
                 console.log(response.data.results)
+
+                const seen = new Set<string>()
+
                 const availableCities = (response.data.results ?? []).filter(
                     (row): row is CityOption =>
                         typeof row.city === 'string' &&
@@ -283,14 +329,22 @@ function OnboardingPage() {
                         typeof row.lat === 'number' &&
                         typeof row.lon === 'number',
                 )
+
+                const uniqueCities = availableCities.filter((c) => {
+                    if (seen.has(c.city)) {
+                        return false
+                    }
+                    seen.add(c.city)
+                    return true
+                })
                 if (!ignoreResult) {
-                    setCityOptions(availableCities)
+                    setCityOptions(uniqueCities)
                 }
                 // ... new Set(availableStates) to remove dups
             } catch (e) {
                 console.log(e)
             }
-        }, 2000)
+        }, 400)
 
         return () => {
             clearTimeout(timer)
@@ -388,25 +442,12 @@ function OnboardingPage() {
                                     })
                                 }
                             />
-                            <label>City</label>
-
+                            <label>Country</label>
                             <input
                                 type="text"
-                                list="city-options"
-                                value={profile.location.city}
-                                disabled={!provinceStateValid}
-                                onChange={(e) => changeCity(e.target.value)}
+                                value={profile.location.country}
+                                readOnly
                             />
-                            <datalist id="city-options">
-                                {cityOptions.map((option) => (
-                                    <option
-                                        key={option.city}
-                                        value={option.city}
-                                    >
-                                        {option.city}
-                                    </option>
-                                ))}
-                            </datalist>
 
                             <label>Province/State</label>
                             <input
@@ -442,12 +483,101 @@ function OnboardingPage() {
                                 })}
                             </datalist>
 
-                            <label>Country</label>
+                            <label>City</label>
+
                             <input
                                 type="text"
-                                value={profile.location.country}
-                                readOnly
+                                list="city-options"
+                                value={profile.location.city}
+                                disabled={!provinceStateValid}
+                                onChange={(e) => changeCity(e.target.value)}
                             />
+                            <datalist id="city-options">
+                                {cityOptions.map((option) => (
+                                    <option
+                                        key={option.city}
+                                        value={option.city}
+                                    >
+                                        {option.city}
+                                    </option>
+                                ))}
+                            </datalist>
+                            <label>SocialLinks</label>
+
+                            {profile.socialLinks.map((socialLink, index) => {
+                                return (
+                                    <div className="flex" key={index}>
+                                        <select
+                                            value={socialLink.platform}
+                                            onChange={(e) =>
+                                                changeSocialLink(
+                                                    index,
+                                                    e.target.value as Platform,
+                                                    socialLink.url,
+                                                )
+                                            }
+                                        >
+                                            {PLATFORMS.map((platform) => (
+                                                <option
+                                                    key={platform}
+                                                    value={platform}
+                                                >
+                                                    {' '}
+                                                    {platform}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            type="text"
+                                            value={socialLink.url}
+                                            onChange={(e) =>
+                                                changeSocialLink(
+                                                    index,
+                                                    socialLink.platform,
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                )
+                            })}
+
+                            <button
+                                onClick={() => {
+                                    // max 4
+                                    if (profile.socialLinks.length > 3) {
+                                        return
+                                    }
+                                    setProfile((prev) => ({
+                                        ...prev,
+                                        socialLinks: [
+                                            ...prev.socialLinks,
+                                            { platform: 'Facebook', url: '' },
+                                        ],
+                                    }))
+                                }}
+                            >
+                                {' '}
+                                +{' '}
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    // they dont need a social link
+                                    if (profile.socialLinks.length === 0) {
+                                        return
+                                    }
+                                    setProfile((prev) => ({
+                                        ...prev,
+                                        socialLinks: prev.socialLinks.slice(
+                                            0,
+                                            prev.socialLinks.length - 1,
+                                        ),
+                                    }))
+                                }}
+                            >
+                                -
+                            </button>
                         </>
                     )}
                     {currentStep === 1 && (
@@ -690,8 +820,17 @@ function OnboardingPage() {
                                     )}
                                 </dd>
                             </dl>
-                            <button type="submit" onClick={handleSubmit}>
-                                Submit
+                            {onboarding.isError && (
+                                <p className="text-red-600">
+                                    {getApiErrorMessage(onboarding.error)}
+                                </p>
+                            )}
+                            <button
+                                type="submit"
+                                onClick={handleSubmit}
+                                disabled={onboarding.isPending}
+                            >
+                                {onboarding.isPending ? 'Submitting' : 'Submit'}
                             </button>
                         </section>
                     )}

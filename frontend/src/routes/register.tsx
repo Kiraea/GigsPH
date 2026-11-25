@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type RegisterRequest, useRegister } from '#/queries/authQueries.ts'
 import type { SubmitEvent } from 'react'
+import { getApiErrorMessage } from '#/utils/getApiErrorMessage.ts'
 export const Route = createFileRoute('/register')({
     component: RegisterPage,
 })
@@ -24,7 +25,6 @@ function RegisterPage() {
             },
         })
     }
-    console.log(import.meta.env.VITE_API_URL)
 
     return (
         <div className=" min-h-screen flex items-center justify-center border-2px ">
@@ -60,11 +60,22 @@ function RegisterPage() {
                                     </span>
                                 </Link>
                             </div>
+
+                            {registration.isError && (
+                                <p className="text-red-400">
+                                    {getApiErrorMessage(
+                                        registration.error,
+                                    )}{' '}
+                                </p>
+                            )}
                             <button
                                 type="submit"
+                                disabled={registration.isPending}
                                 className=" bg-emerald-500 px-4 py-2 whitespace-nowrap font-bold rounded-xl text-fixed-white"
                             >
-                                Register
+                                {registration.isPending
+                                    ? 'Registering...'
+                                    : 'Register'}
                             </button>
                         </div>
                     </div>

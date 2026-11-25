@@ -13,7 +13,7 @@ export type RegisterResponse = {
 async function register(request: RegisterRequest): Promise<RegisterResponse> {
     try {
         const response = await axiosInstance.post<RegisterResponse>(
-            '/auth/Register',
+            '/auth/register',
             request,
         )
         return response.data
@@ -32,7 +32,10 @@ export function useRegister() {
 
 async function login(request: LoginRequest): Promise<LoginResponse> {
     try {
-        const response = await axiosInstance.post('auth/login', request)
+        const response = await axiosInstance.post<LoginResponse>(
+            'auth/login',
+            request,
+        )
         return response.data
     } catch (e) {
         if (axios.isAxiosError(e)) {

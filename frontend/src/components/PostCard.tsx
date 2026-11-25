@@ -1,4 +1,4 @@
-﻿import type { PostResponse } from '#/routes/feed.tsx'
+﻿import { type PostResponse, useUpdateLike } from '#/queries/postQueries.ts'
 import { useState } from 'react'
 import { ConvertDateTimeToReadable } from '#/utils/generalUtils.ts'
 import {
@@ -15,7 +15,16 @@ export function PostCard({ post }: { post: PostResponse }) {
     const [slideFrom, setSlideFrom] = useState<'left' | 'right'>('right')
     const media = post.media[mediaIndex]
 
-    const toggleLike = () => {}
+    const updateLike = useUpdateLike()
+
+    console.log(post)
+
+    const handleLike = () => {
+        updateLike.mutate({
+            postId: post.id,
+            request: { isLiked: !post.isLiked },
+        })
+    }
 
     return (
         <article className="flex flex-col rounded-2xl bg-background-medium shadow-sm">
@@ -31,14 +40,17 @@ export function PostCard({ post }: { post: PostResponse }) {
                             {post.publisherName}
                         </p>
                         <time className="font-light text-foreground-low text-sm">
-                            {ConvertDateTimeToReadable(post.CreatedAt)}
+                            {ConvertDateTimeToReadable(post.createdAt)}
                         </time>
                     </div>
                 </header>
 
                 <div className="flex flex-col gap-2 ">
                     <h2 className="font-bold text-3xl"> {post.title}</h2>
-                    <p className="text-foreground-medium"> {post.description}</p>
+                    <p className="text-foreground-medium">
+                        {' '}
+                        {post.description}
+                    </p>
                 </div>
                 {media && (
                     <div className="relative flex max-w-200 w-full gap-2 justify-between items-center self-center">
@@ -65,7 +77,7 @@ export function PostCard({ post }: { post: PostResponse }) {
                             >
                                 {media.contentType.startsWith('image/') && (
                                     <img
-                                        src={media.Url}
+                                        src={media.url}
                                         alt={post.title}
                                         className="h-full w-full object-contain"
                                     />
@@ -73,14 +85,14 @@ export function PostCard({ post }: { post: PostResponse }) {
 
                                 {media.contentType.startsWith('video/') && (
                                     <video
-                                        src={media.Url}
+                                        src={media.url}
                                         controls
                                         className="h-full w-full object-contain"
                                     />
                                 )}
                                 {media.contentType.startsWith('audio/') && (
                                     <audio
-                                        src={media.Url}
+                                        src={media.url}
                                         controls
                                         className="w-full h-full object-contain"
                                     />
@@ -126,13 +138,15 @@ export function PostCard({ post }: { post: PostResponse }) {
                     </div>
                 )}
 
-                {(post.Genres.length > 0 || post.Instruments.length > 0) && (
+                {(post.genres.length > 0 || post.instruments.length > 0) && (
                     <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-md">
-                        {post.Genres.length > 0 && (
+                        {post.genres.length > 0 && (
                             <>
-                                <p className="text-foreground-low text-sm">Genres</p>
+                                <p className="text-foreground-low text-sm">
+                                    Genres
+                                </p>
                                 <ul className="flex flex-wrap gap-2">
-                                    {post.Genres.map((genre) => (
+                                    {post.genres.map((genre) => (
                                         <li
                                             className="rounded-2xl px-5 text-sm flex items-center justify-center bg-purple-200 text-purple-900"
                                             key={genre.id}
@@ -144,13 +158,13 @@ export function PostCard({ post }: { post: PostResponse }) {
                             </>
                         )}
 
-                        {post.Instruments.length > 0 && (
+                        {post.instruments.length > 0 && (
                             <>
                                 <p className="text-foreground-low text-sm">
                                     Instruments
                                 </p>
                                 <ul className="flex flex-wrap gap-2">
-                                    {post.Instruments.map((instrument) => (
+                                    {post.instruments.map((instrument) => (
                                         <li
                                             className="rounded-2xl px-5 text-sm flex items-center justify-center bg-background-low text-foreground-low"
                                             key={instrument.id}
@@ -167,9 +181,12 @@ export function PostCard({ post }: { post: PostResponse }) {
 
             <footer className=" flex justify-between p-5">
                 <div className="flex items-center-safe justify-center gap-5 ">
-                    <button className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={handleLike}
+                        disabled={updateLike.isPending}
+                    >
                         <Heart
-                            onClick={toggleLike}
                             className={
                                 post.isLiked
                                     ? 'fill-purple-400 stroke-none'
@@ -177,8 +194,9 @@ export function PostCard({ post }: { post: PostResponse }) {
                             }
                             size={20}
                         />
-                        <div>{post.likedCount} </div>
                     </button>
+
+                    <div>{post.likedCount} </div>
                     <button className="flex gap-2">
                         <MessageCircle className="text-foreground-low" />5
                     </button>
