@@ -15,12 +15,12 @@ import { Route as DemoUploadRouteImport } from './routes/demoUpload'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppAuthenticatedRouteImport } from './routes/_app/_authenticated'
-import { Route as AppBandsRouteImport } from './routes/_app/bands'
 import { Route as AppConversationsRouteImport } from './routes/_app/conversations'
 import { Route as AppDiscoverRouteImport } from './routes/_app/discover'
 import { Route as AppFeedRouteImport } from './routes/_app/feed'
 import { Route as AppMusicListingsRouteImport } from './routes/_app/music-listings'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppAuthenticatedBandsRouteImport } from './routes/_app/_authenticated/bands'
 import { Route as AppAuthenticatedOnboardingRouteImport } from './routes/_app/_authenticated/onboarding'
 import { Route as AppConversationsIndexRouteImport } from './routes/_app/conversations/index'
 import { Route as AppConversationsConversationIdRouteImport } from './routes/_app/conversations/$conversationId'
@@ -53,11 +53,6 @@ const AppAuthenticatedRoute = AppAuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => AppRoute,
 } as any)
-const AppBandsRoute = AppBandsRouteImport.update({
-  id: '/bands',
-  path: '/bands',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppConversationsRoute = AppConversationsRouteImport.update({
   id: '/conversations',
   path: '/conversations',
@@ -83,6 +78,11 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   path: '/demo/tanstack-query',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAuthenticatedBandsRoute = AppAuthenticatedBandsRouteImport.update({
+  id: '/bands',
+  path: '/bands',
+  getParentRoute: () => AppAuthenticatedRoute,
+} as any)
 const AppAuthenticatedOnboardingRoute =
   AppAuthenticatedOnboardingRouteImport.update({
     id: '/onboarding',
@@ -106,12 +106,12 @@ export interface FileRoutesByFullPath {
   '/demoUpload': typeof DemoUploadRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/bands': typeof AppBandsRoute
   '/conversations': typeof AppConversationsRouteWithChildren
   '/discover': typeof AppDiscoverRoute
   '/feed': typeof AppFeedRoute
   '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/bands': typeof AppAuthenticatedBandsRoute
   '/onboarding': typeof AppAuthenticatedOnboardingRoute
   '/conversations/$conversationId': typeof AppConversationsConversationIdRoute
   '/conversations/': typeof AppConversationsIndexRoute
@@ -121,11 +121,11 @@ export interface FileRoutesByTo {
   '/demoUpload': typeof DemoUploadRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/bands': typeof AppBandsRoute
   '/discover': typeof AppDiscoverRoute
   '/feed': typeof AppFeedRoute
   '/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/bands': typeof AppAuthenticatedBandsRoute
   '/onboarding': typeof AppAuthenticatedOnboardingRoute
   '/conversations/$conversationId': typeof AppConversationsConversationIdRoute
   '/conversations': typeof AppConversationsIndexRoute
@@ -138,12 +138,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_app/_authenticated': typeof AppAuthenticatedRouteWithChildren
-  '/_app/bands': typeof AppBandsRoute
   '/_app/conversations': typeof AppConversationsRouteWithChildren
   '/_app/discover': typeof AppDiscoverRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/music-listings': typeof AppMusicListingsRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/_app/_authenticated/bands': typeof AppAuthenticatedBandsRoute
   '/_app/_authenticated/onboarding': typeof AppAuthenticatedOnboardingRoute
   '/_app/conversations/$conversationId': typeof AppConversationsConversationIdRoute
   '/_app/conversations/': typeof AppConversationsIndexRoute
@@ -155,12 +155,12 @@ export interface FileRouteTypes {
     | '/demoUpload'
     | '/login'
     | '/register'
-    | '/bands'
     | '/conversations'
     | '/discover'
     | '/feed'
     | '/music-listings'
     | '/demo/tanstack-query'
+    | '/bands'
     | '/onboarding'
     | '/conversations/$conversationId'
     | '/conversations/'
@@ -170,11 +170,11 @@ export interface FileRouteTypes {
     | '/demoUpload'
     | '/login'
     | '/register'
-    | '/bands'
     | '/discover'
     | '/feed'
     | '/music-listings'
     | '/demo/tanstack-query'
+    | '/bands'
     | '/onboarding'
     | '/conversations/$conversationId'
     | '/conversations'
@@ -186,12 +186,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_app/_authenticated'
-    | '/_app/bands'
     | '/_app/conversations'
     | '/_app/discover'
     | '/_app/feed'
     | '/_app/music-listings'
     | '/demo/tanstack-query'
+    | '/_app/_authenticated/bands'
     | '/_app/_authenticated/onboarding'
     | '/_app/conversations/$conversationId'
     | '/_app/conversations/'
@@ -250,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthenticatedRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/bands': {
-      id: '/_app/bands'
-      path: '/bands'
-      fullPath: '/bands'
-      preLoaderRoute: typeof AppBandsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/conversations': {
       id: '/_app/conversations'
       path: '/conversations'
@@ -292,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/_authenticated/bands': {
+      id: '/_app/_authenticated/bands'
+      path: '/bands'
+      fullPath: '/bands'
+      preLoaderRoute: typeof AppAuthenticatedBandsRouteImport
+      parentRoute: typeof AppAuthenticatedRoute
+    }
     '/_app/_authenticated/onboarding': {
       id: '/_app/_authenticated/onboarding'
       path: '/onboarding'
@@ -317,10 +317,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAuthenticatedRouteChildren {
+  AppAuthenticatedBandsRoute: typeof AppAuthenticatedBandsRoute
   AppAuthenticatedOnboardingRoute: typeof AppAuthenticatedOnboardingRoute
 }
 
 const AppAuthenticatedRouteChildren: AppAuthenticatedRouteChildren = {
+  AppAuthenticatedBandsRoute: AppAuthenticatedBandsRoute,
   AppAuthenticatedOnboardingRoute: AppAuthenticatedOnboardingRoute,
 }
 
@@ -342,7 +344,6 @@ const AppConversationsRouteWithChildren =
 
 interface AppRouteChildren {
   AppAuthenticatedRoute: typeof AppAuthenticatedRouteWithChildren
-  AppBandsRoute: typeof AppBandsRoute
   AppConversationsRoute: typeof AppConversationsRouteWithChildren
   AppDiscoverRoute: typeof AppDiscoverRoute
   AppFeedRoute: typeof AppFeedRoute
@@ -351,7 +352,6 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthenticatedRoute: AppAuthenticatedRouteWithChildren,
-  AppBandsRoute: AppBandsRoute,
   AppConversationsRoute: AppConversationsRouteWithChildren,
   AppDiscoverRoute: AppDiscoverRoute,
   AppFeedRoute: AppFeedRoute,

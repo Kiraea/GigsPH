@@ -1,5 +1,9 @@
 ﻿import { axiosInstance } from '#/axiosInstance.tsx'
-import { useMutation } from '@tanstack/react-query'
+import {
+    queryOptions,
+    useMutation,
+    useQueryClient,
+} from '@tanstack/react-query'
 
 export type CreateBandRequest = {
     name: string
@@ -15,14 +19,14 @@ export type CreateBandResponse = {
 
 export type BandRole = 'Leader' | 'Member'
 
-export type AcceptInvitationRequest = {
-    Status: string
+export type InvitationResponseRequest = {
+    status: 'Accepted' | 'Rejected'
 }
 
 export type InvitationStatus = 'Accepted' | 'Rejected' | 'Pending' | 'Cancelled'
 
-export type AcceptInvitationResponse = {
-    invitationId: number
+export type InvitationResponseResult = {
+    invitationId: string
     status: string
     bandId: string
 }
@@ -30,6 +34,7 @@ export type AcceptInvitationResponse = {
 export type SendInvitationRequest = {
     toId: string
 }
+
 export type SendInvitationResponse = {
     invitationId: string
     bandId: string
@@ -89,42 +94,96 @@ export type GetPublicBandsResponse = {
     hasMore: boolean
 }
 
+export type LeaveBandResponse = {
+    id: string
+}
+
+const leaveBand = async (bandId: string): Promise<LeaveBandResponse> => {
+    const response = await axiosInstance.post<LeaveBandResponse>(
+        `/bands/${bandId}/leave`,
+    )
+    return response.data
+}
+
+export const useLeaveBand = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: leaveBand,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['bands'] })
+        },
+    })
+}
+
+const getMyBandInvitations = async (): Promise<
+    GetMyBandInvitationResponse[]
+> => {
+    const response = await axiosInstance.get('/bands/invitations')
+    return response.data
+}
+
+export const getMyBandInvitationQuery = (userId?: string) => {
+    return queryOptions<GetMyBandInvitationResponse[]>({
+        queryKey: ['bands', 'invitations', userId],
+        queryFn: getMyBandInvitations,
+        enabled: Boolean(userId),
+    })
+}
+
+const getMyBands = async (): Promise<GetMyBandResponse[]> => {
+    const response = await axiosInstance.get('/bands/me')
+    return response.data
+}
+
+export const getMyBandsQuery = (userId?: string) => {
+    return queryOptions<GetMyBandResponse[]>({
+        queryKey: ['bands', 'me', userId],
+        queryFn: getMyBands,
+        enabled: Boolean(userId),
+    })
+}
+
 const CreateBand = async (
     request: CreateBandRequest,
 ): Promise<CreateBandResponse> => {
     const response = await axiosInstance.post<CreateBandResponse>(
-        '/api/bands',
+        '/bands',
         request,
     )
     return response.data
 }
 
-const useCreateBand = () => {
+export const useCreateBand = () => {
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: CreateBand,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['bands'] })
+        },
     })
 }
 
-const AcceptInvitation = ({
+const invitationResponse = async ({
     request,
-    bandId,
     invitationId,
 }: {
-    request: AcceptInvitationRequest
-    bandId: string
+    request: InvitationResponseRequest
     invitationId: string
-}): Promise<AcceptInvitationResponse> => {
-    const response = await axiosInstance.post(
-        `/bands/${bandId}/invitations/${invitationId}/response`,
+}): Promise<InvitationResponseResult> => {
+    const response = await axiosInstance.post<InvitationResponseResult>(
+        `/bands/invitations/${invitationId}/response`,
         request,
     )
     return response.data
 }
 
-const useAcceptInvitation = () => {
+export const useInvitationResponse = () => {
+    const queryClient = useQueryClient()
     return useMutation({
-        mutationFn: AcceptInvitation,
-        // put next time invalidate here
+        mutationFn: invitationResponse,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['bands'] })
+        },
     })
 }
 
