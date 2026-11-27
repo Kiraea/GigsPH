@@ -18,8 +18,7 @@ public class GetConversationsHandler
         _userManager = userManager;
     }
 
-    public async Task<Result<GetConversationsResponse>> HandleAsync(
-        GetConversationsRequest request, string userId)
+    public async Task<Result<GetConversationsResponse>> HandleAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)

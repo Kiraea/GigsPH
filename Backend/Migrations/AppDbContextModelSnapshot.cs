@@ -22,21 +22,6 @@ namespace PrjA.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("AppUserBand", b =>
-                {
-                    b.Property<string>("AppUsersId")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("BandId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("AppUsersId", "BandId");
-
-                    b.HasIndex("BandId");
-
-                    b.ToTable("AppUserBand");
-                });
-
             modelBuilder.Entity("AppUserGenre", b =>
                 {
                     b.Property<string>("AppUsersId")
@@ -52,19 +37,34 @@ namespace PrjA.Migrations
                     b.ToTable("AppUserGenre");
                 });
 
-            modelBuilder.Entity("AppUserInstrument", b =>
+            modelBuilder.Entity("GenrePost", b =>
                 {
-                    b.Property<string>("AppUsersId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("GenresId")
+                        .HasColumnType("uuid");
 
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("GenresId", "PostId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("GenrePost");
+                });
+
+            modelBuilder.Entity("InstrumentPost", b =>
+                {
                     b.Property<Guid>("InstrumentsId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("AppUsersId", "InstrumentsId");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("InstrumentsId");
+                    b.HasKey("InstrumentsId", "PostId");
 
-                    b.ToTable("AppUserInstrument");
+                    b.HasIndex("PostId");
+
+                    b.ToTable("InstrumentPost");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -224,7 +224,7 @@ namespace PrjA.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Firstname")
+                    b.Property<string>("FirstName")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsOnboarded")
@@ -289,6 +289,9 @@ namespace PrjA.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
@@ -296,9 +299,108 @@ namespace PrjA.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.ToTable("Bands");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.BandInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InvitedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InvitedToUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("InvitedToUserId");
+
+                    b.HasIndex("BandId", "InvitedToUserId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 2");
+
+                    b.ToTable("BandInvitations");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DirectRequestStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InitiatedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerUserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitiatedByUserId");
+
+                    b.HasIndex("OwnerUserId");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.ConversationMember", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ConversationId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConversationMembers");
                 });
 
             modelBuilder.Entity("PrjA.Domain.Entities.Genre", b =>
@@ -307,13 +409,52 @@ namespace PrjA.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.ToTable("Genres");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.GroupChatInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("InvitedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InvitedToUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("InvitedToUserId");
+
+                    b.HasIndex("ConversationId", "InvitedToUserId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 1");
+
+                    b.ToTable("GroupChatInvitations");
                 });
 
             modelBuilder.Entity("PrjA.Domain.Entities.Instrument", b =>
@@ -322,9 +463,15 @@ namespace PrjA.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -345,19 +492,286 @@ namespace PrjA.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ProvinceState")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("latitude")
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("latitude")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("longitude")
+                    b.Property<double?>("longitude")
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
                     b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MediaUpload", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ObjectKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RequestedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("RequestedByUserId");
+
+                    b.ToTable("MediaUploads");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClientMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SenderUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientMessageId")
+                        .IsUnique();
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderUserId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("GenreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GenreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MusicListings");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListingApplication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicantUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MusicListingSlotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicantUserId");
+
+                    b.HasIndex("MusicListingSlotId");
+
+                    b.ToTable("MusicListingApplications");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListingSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InstrumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MusicListingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("MusicListingId");
+
+                    b.ToTable("MusicListingSlots");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.PostLikes", b =>
+                {
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("PostId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostLikes");
                 });
 
             modelBuilder.Entity("PrjA.Domain.Entities.SocialLink", b =>
@@ -370,8 +784,14 @@ namespace PrjA.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Platform")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Url")
                         .IsRequired()
@@ -384,19 +804,121 @@ namespace PrjA.Migrations
                     b.ToTable("SocialLinks");
                 });
 
-            modelBuilder.Entity("AppUserBand", b =>
+            modelBuilder.Entity("PrjA.Domain.Entities.UserBand", b =>
                 {
-                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("AppUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
-                    b.HasOne("PrjA.Domain.Entities.Band", null)
-                        .WithMany()
-                        .HasForeignKey("BandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "BandId");
+
+                    b.HasIndex("BandId");
+
+                    b.ToTable("UserBands");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserBlock", b =>
+                {
+                    b.Property<string>("BlockerUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BlockedUserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("BlockerUserId", "BlockedUserId");
+
+                    b.HasIndex("BlockedUserId");
+
+                    b.ToTable("UserBlocks");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserGenreScore", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("GenreId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "GenreId");
+
+                    b.ToTable("UserGenreScores");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserInstrument", b =>
+                {
+                    b.Property<Guid>("InstrumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("isMain")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("InstrumentId", "AppUserId");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("UserInstruments");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserInstrumentScore", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("InstrumentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "InstrumentId");
+
+                    b.ToTable("UserInstrumentScores");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserPublisherScore", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublisherId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "PublisherId");
+
+                    b.ToTable("UserPublisherScores");
                 });
 
             modelBuilder.Entity("AppUserGenre", b =>
@@ -414,17 +936,32 @@ namespace PrjA.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AppUserInstrument", b =>
+            modelBuilder.Entity("GenrePost", b =>
                 {
-                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                    b.HasOne("PrjA.Domain.Entities.Genre", null)
                         .WithMany()
-                        .HasForeignKey("AppUsersId")
+                        .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PrjA.Domain.Entities.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("InstrumentPost", b =>
+                {
                     b.HasOne("PrjA.Domain.Entities.Instrument", null)
                         .WithMany()
                         .HasForeignKey("InstrumentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -489,6 +1026,203 @@ namespace PrjA.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("PrjA.Domain.Entities.BandInvitation", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Band", null)
+                        .WithMany()
+                        .HasForeignKey("BandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedToUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Conversation", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InitiatedByUserId");
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.ConversationMember", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Conversation", "Conversation")
+                        .WithMany("ConversationMembers")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.GroupChatInvitation", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("InvitedToUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MediaUpload", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Post", null)
+                        .WithMany("MediaUploads")
+                        .HasForeignKey("PostId");
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Conversation", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "SenderUser")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SenderUser");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListing", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Genre", "Genre")
+                        .WithMany()
+                        .HasForeignKey("GenreId");
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListingApplication", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "ApplicantUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicantUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.MusicListingSlot", "MusicListingSlot")
+                        .WithMany("Applications")
+                        .HasForeignKey("MusicListingSlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicantUser");
+
+                    b.Navigation("MusicListingSlot");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListingSlot", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Instrument", "Instrument")
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.MusicListing", "MusicListing")
+                        .WithMany("Slots")
+                        .HasForeignKey("MusicListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Instrument");
+
+                    b.Navigation("MusicListing");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Post", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Band", "Band")
+                        .WithMany()
+                        .HasForeignKey("BandId");
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Band");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.PostLikes", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Post", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PrjA.Domain.Entities.SocialLink", b =>
                 {
                     b.HasOne("PrjA.Domain.Entities.AppUser", "AppUser")
@@ -500,14 +1234,105 @@ namespace PrjA.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("PrjA.Domain.Entities.UserBand", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.Band", "Band")
+                        .WithMany("UserBands")
+                        .HasForeignKey("BandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "User")
+                        .WithMany("UserBands")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Band");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserBlock", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("BlockedUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("BlockerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.UserInstrument", b =>
+                {
+                    b.HasOne("PrjA.Domain.Entities.AppUser", "AppUser")
+                        .WithMany("UserInstruments")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrjA.Domain.Entities.Instrument", "Instrument")
+                        .WithMany("UserInstruments")
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Instrument");
+                });
+
             modelBuilder.Entity("PrjA.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("SocialLinks");
+
+                    b.Navigation("UserBands");
+
+                    b.Navigation("UserInstruments");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Band", b =>
+                {
+                    b.Navigation("UserBands");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Conversation", b =>
+                {
+                    b.Navigation("ConversationMembers");
+
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Instrument", b =>
+                {
+                    b.Navigation("UserInstruments");
                 });
 
             modelBuilder.Entity("PrjA.Domain.Entities.Location", b =>
                 {
                     b.Navigation("AppUsers");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListing", b =>
+                {
+                    b.Navigation("Slots");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.MusicListingSlot", b =>
+                {
+                    b.Navigation("Applications");
+                });
+
+            modelBuilder.Entity("PrjA.Domain.Entities.Post", b =>
+                {
+                    b.Navigation("Likes");
+
+                    b.Navigation("MediaUploads");
                 });
 #pragma warning restore 612, 618
         }

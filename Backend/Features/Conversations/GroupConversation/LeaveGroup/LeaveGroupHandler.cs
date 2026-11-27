@@ -19,7 +19,7 @@ public class LeaveGroupHandler
     }
 
     public async Task<Result<LeaveGroupResponse>> HandleAsync(
-        LeaveGroupRequest request, string userId)
+        Guid conversationId, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -33,7 +33,7 @@ public class LeaveGroupHandler
         }
 
         var conversationMember = await _dbContext.ConversationMembers.Where(cm =>
-            cm.ConversationId == request.ConversationId && user.Id == cm.UserId &&
+            cm.ConversationId == conversationId && user.Id == cm.UserId &&
             cm.Conversation != null && cm.Conversation.Type == ConversationType.Group).FirstOrDefaultAsync();
 
         if (conversationMember == null)
@@ -48,7 +48,7 @@ public class LeaveGroupHandler
         }
 
         var isOwner =
-            await _dbContext.Conversations.AnyAsync(c => c.Id == request.ConversationId 
+            await _dbContext.Conversations.AnyAsync(c => c.Id == conversationId 
                                                          && c.OwnerUserId == user.Id);
         
         if (isOwner)
@@ -73,4 +73,3 @@ public class LeaveGroupHandler
 
     }
 }
-

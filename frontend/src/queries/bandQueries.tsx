@@ -41,8 +41,18 @@ export type SendInvitationResponse = {
     toId: string
     status: string
 }
-export type UpdateBandMemberRoleRequest = {}
-export type UpdateBandMemberRoleResponse = {}
+
+export type UpdateBandMemberRoleRequest = {
+    role: BandRole
+}
+
+export type UpdateBandMemberRoleResponse = {
+    bandId: string
+    targetUserId: string
+    targetRole: BandRole
+    actingUserId: string
+    actingRole: BandRole
+}
 
 export type BandMemberInstrument = {
     id: string
@@ -115,6 +125,32 @@ export const useLeaveBand = () => {
     })
 }
 
+const updateBandMemberRole = async ({
+    bandId,
+    targetUserId,
+    request,
+}: {
+    bandId: string
+    targetUserId: string
+    request: UpdateBandMemberRoleRequest
+}): Promise<UpdateBandMemberRoleResponse> => {
+    const response = await axiosInstance.patch<UpdateBandMemberRoleResponse>(
+        `/bands/${bandId}/members/${targetUserId}/role`,
+        request,
+    )
+    return response.data
+}
+
+export const useUpdateBandMemberRole = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: updateBandMemberRole,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['bands'] })
+        },
+    })
+}
+
 const getMyBandInvitations = async (): Promise<
     GetMyBandInvitationResponse[]
 > => {
@@ -122,11 +158,10 @@ const getMyBandInvitations = async (): Promise<
     return response.data
 }
 
-export const getMyBandInvitationQuery = (userId?: string) => {
+export const getMyBandInvitationQuery = () => {
     return queryOptions<GetMyBandInvitationResponse[]>({
-        queryKey: ['bands', 'invitations', userId],
+        queryKey: ['bands', 'invitations'],
         queryFn: getMyBandInvitations,
-        enabled: Boolean(userId),
     })
 }
 
@@ -135,11 +170,10 @@ const getMyBands = async (): Promise<GetMyBandResponse[]> => {
     return response.data
 }
 
-export const getMyBandsQuery = (userId?: string) => {
+export const getMyBandsQuery = () => {
     return queryOptions<GetMyBandResponse[]>({
-        queryKey: ['bands', 'me', userId],
+        queryKey: ['bands', 'me'],
         queryFn: getMyBands,
-        enabled: Boolean(userId),
     })
 }
 

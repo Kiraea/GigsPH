@@ -19,7 +19,7 @@ public class GetGroupDetailsHandler
     }
 
     public async Task<Result<GetGroupDetailsResponse>> HandleAsync(
-        GetGroupDetailsRequest request, string userId)
+        Guid conversationId, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -32,13 +32,13 @@ public class GetGroupDetailsHandler
             });
         }
 
-        var groupConversations = await _dbContext.Conversations.Where(m => m.Id == request.ConversationId
+        var groupConversations = await _dbContext.Conversations.Where(m => m.Id == conversationId
                                                                            && m.Type == ConversationType.Group
                                                                            && m.ConversationMembers.Any(cm =>
                                                                                cm.UserId == userId)
         ).Select(c => new GetGroupDetailsResponse()
         {
-            ConversationId = request.ConversationId,
+            ConversationId = conversationId,
             Name = c.Name,
             IsOwner = c.OwnerUserId == userId ? true : false,
             UserGroupChatDetails = c.ConversationMembers.Select(c => new UserGroupChatDetail()
@@ -65,4 +65,3 @@ public class GetGroupDetailsHandler
  
     }
 }
-

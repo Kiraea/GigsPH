@@ -59,7 +59,7 @@ public class GetMusicListingsHandler
             EndsAt = ml.EndsAt,
             StartsAt = ml.StartsAt,
             ExpiresAt = ml.ExpiresAt,
-            Genre = ml.Genre == null ? null : new GetGenresResponse()
+            Genre = ml.Genre == null ? null : new GenreDto()
             {
                 Id = ml.Genre.Id,
                 Name = ml.Genre.Name

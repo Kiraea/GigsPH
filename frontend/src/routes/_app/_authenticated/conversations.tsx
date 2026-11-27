@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ConversationCard } from '#/components/conversationCard.tsx'
 
-export const Route = createFileRoute('/_app/conversations')({
+export const Route = createFileRoute('/_app/_authenticated/conversations')({
     component: RouteComponent,
 })
 

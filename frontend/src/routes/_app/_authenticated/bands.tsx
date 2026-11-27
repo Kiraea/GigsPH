@@ -7,23 +7,22 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { getApiErrorMessage } from '#/utils/getApiErrorMessage.ts'
 import { BandCard } from '#/components/BandCard.tsx'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { CreateBandModal } from '#/components/CreateBandModal.tsx'
-import { AuthContext } from '#/contexts/authContext.tsx'
 import { UserModal } from '#/components/UserModal.tsx'
 import { BandInvitationsCard } from '#/components/BandInvitationsCard.tsx'
+import { TransferLeadershipModal } from '#/components/TransferLeadershipModal.tsx'
+import { LeaveBandModal } from '#/components/LeaveBandModal.tsx'
+import { CreatePostmodal } from '#/components/CreatePostmodal.tsx'
 
 export const Route = createFileRoute('/_app/_authenticated/bands')({
     component: RouteComponent,
 })
 
 function RouteComponent() {
-    const auth = useContext(AuthContext)
-    const myBandsQuery = useQuery(getMyBandsQuery(auth?.user?.id))
+    const myBandsQuery = useQuery(getMyBandsQuery())
 
-    const myBandInvitationsQuery = useQuery(
-        getMyBandInvitationQuery(auth?.user?.id),
-    )
+    const myBandInvitationsQuery = useQuery(getMyBandInvitationQuery())
 
     const invitations = myBandInvitationsQuery.data ?? []
 
@@ -31,6 +30,10 @@ function RouteComponent() {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false)
     const [inviteBand, setInviteBand] = useState<GetMyBandResponse | null>(null)
+    const [transferBand, setTransferBand] = useState<GetMyBandResponse | null>(
+        null,
+    )
+    const [leaveBand, setLeaveBand] = useState<GetMyBandResponse | null>(null)
 
     const handleOnInvite = (band: GetMyBandResponse) => {
         setInviteBand(band)
@@ -39,6 +42,8 @@ function RouteComponent() {
     const handleCreateModalOpen = () => {
         setIsCreateModalOpen(true)
     }
+
+    const [postBand, setPostBand] = useState('')
 
     return (
         <div className="grid grid-cols-[minmax(0,1fr)_320px]">
@@ -71,6 +76,27 @@ function RouteComponent() {
                         />
                     )}
 
+                    {transferBand && (
+                        <TransferLeadershipModal
+                            band={transferBand}
+                            onClose={() => setTransferBand(null)}
+                        />
+                    )}
+
+                    {leaveBand && (
+                        <LeaveBandModal
+                            band={leaveBand}
+                            onClose={() => setLeaveBand(null)}
+                        />
+                    )}
+
+                    {postBand && (
+                        <CreatePostmodal
+                            onClose={() => setPostBand('')}
+                            initialBandId={postBand}
+                        />
+                    )}
+
                     {isCreateModalOpen && (
                         <CreateBandModal
                             onClose={() => setIsCreateModalOpen(false)}
@@ -98,13 +124,15 @@ function RouteComponent() {
                                     key={myBand.id}
                                     myBand={myBand}
                                     onInvite={handleOnInvite}
+                                    onTransferLeadership={setTransferBand}
+                                    onLeave={setLeaveBand}
+                                    onPost={() => setPostBand(myBand.id)}
                                 />
                             ))}
                         </div>
                     )}
                 </div>
             </div>
-
             <div className="flex flex-col gap-4">
                 <h2>Pending Invitations ({invitations.length})</h2>
 

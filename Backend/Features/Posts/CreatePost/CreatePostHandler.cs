@@ -56,6 +56,36 @@ public class CreatePostHandler
 
         }
         
+        var genreIds = request.GenreIds.Distinct().ToList();
+        var genres = await _dbContext.Genres
+            .Where(g => genreIds.Contains(g.Id))
+            .ToListAsync();
+
+        if (genres.Count != request.GenreIds.Count)
+        {
+            return Result<CreatePostResponse>.Failure(new Error
+            {
+                Code = "Genre.InvalidSelection",
+                Message = "One or more selected genres do not exist or are repeated.",
+                Type = ErrorType.BadRequest,
+            });
+        }
+
+        var instrumentIds = request.InstrumentIds.Distinct().ToList();
+        var instruments = await _dbContext.Instruments
+            .Where(i => instrumentIds.Contains(i.Id))
+            .ToListAsync();
+
+        if (instruments.Count != request.InstrumentIds.Count)
+        {
+            return Result<CreatePostResponse>.Failure(new Error
+            {
+                Code = "Instrument.InvalidSelection",
+                Message = "One or more selected instruments do not exist or are repeated.",
+                Type = ErrorType.BadRequest,
+            });
+        }
+        
         // check if all files were uploaded succesfully use uploadedId
         // if its not uploaded all dont create post
         // if it is create post
@@ -99,6 +129,8 @@ public class CreatePostHandler
             Title = request.Title,
             Description = request.Description,
             MediaUploads = uploads,
+            Genres = genres,
+            Instruments = instruments,
         };
         foreach (var upload in uploads)
         {

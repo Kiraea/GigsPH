@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Ellipsis, PenLine, UserRoundPlus } from 'lucide-react'
 
-export const Route = createFileRoute('/_app/conversations/$conversationId')({
+export const Route = createFileRoute('/_app/_authenticated/conversations/$conversationId')({
     component: RouteComponent,
 })
 

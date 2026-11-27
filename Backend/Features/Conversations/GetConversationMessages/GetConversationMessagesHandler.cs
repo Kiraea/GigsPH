@@ -18,7 +18,7 @@ public class GetConversationMessagesHandler
     }
 
     public async Task<Result<GetConversationMessagesResponse>> HandleAsync(
-        Guid conversationId, GetConversationMessagesRequest request, string userId)
+        Guid conversationId, string userId, DateTimeOffset? cursor)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -30,7 +30,11 @@ public class GetConversationMessagesHandler
                 Type = ErrorType.NotFound,
             });
         }
+        var pageSize = 20;
+        
 
+        
+        // 10.03 <
         var isPartOfConversation =
             await _dbContext.ConversationMembers.AnyAsync(cm =>
                 cm.ConversationId == conversationId && cm.UserId == userId);
@@ -44,8 +48,17 @@ public class GetConversationMessagesHandler
                 Type = ErrorType.Forbidden,
             });
         }
-        // add take next time but no need
-        var messages = await _dbContext.Messages.AsNoTracking().Where(m => m.ConversationId == conversationId).OrderBy(m => m.CreatedAt).ThenBy(m => m.Id).Select(m => new MessageDto()
+
+        
+
+        var query = _dbContext.Messages.AsNoTracking().Where(m => m.ConversationId == conversationId);
+        if (cursor != null)
+        {
+            var cursorUtc = cursor.Value.UtcDateTime;
+            query = query.Where(m => m.CreatedAt < cursorUtc);
+            
+        }
+        var messages = await query.OrderByDescending(m => m.CreatedAt).ThenByDescending(m => m.Id).Select(m => new MessageDto()
         {
             Id = m.Id,
             ClientMessageId = m.ClientMessageId,
@@ -53,12 +66,24 @@ public class GetConversationMessagesHandler
             SenderUserId = m.SenderUserId,
             SenderDisplayName = m.SenderUser!.DisplayName ?? "Unknown User",
             Text = m.Text,
-        }).ToListAsync();
+        }).Take(pageSize + 1).ToListAsync();
+        
+        
+        var hasMore = messages.Count > pageSize;
+        if (hasMore)
+        {
+            messages.RemoveAt(messages.Count - 1);
+        }
+
+        messages.Reverse();
+
+        DateTime? oldest = hasMore ? messages[0].CreatedAt : null;
 
         return Result<GetConversationMessagesResponse>.Success(new GetConversationMessagesResponse()
         {
             ConversationId = conversationId,
-            Messages = messages 
+            Messages = messages,
+            Cursor = oldest
         });
 
  

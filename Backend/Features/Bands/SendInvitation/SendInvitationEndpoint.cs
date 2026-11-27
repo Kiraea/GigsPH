@@ -9,7 +9,7 @@ namespace PrjA.Features.Bands.SendInvitation;
 [ApiController]
 [Authorize]
 [Route("/api/bands")]
-public class SendInvitationEndpoint: ControllerBase
+public class SendInvitationEndpoint : ControllerBase
 {
     private readonly SendInvitationHandler _handler;
     private readonly IValidator<SendInvitationRequest> _validator;
@@ -20,8 +20,10 @@ public class SendInvitationEndpoint: ControllerBase
         _validator = validator;
     }
 
-    [HttpPost("invitations")]
-    public async Task<ActionResult<SendInvitationResponse>> SendInvitation([FromBody] SendInvitationRequest request)
+    [HttpPost("{bandId:guid}/invitations")]
+    public async Task<ActionResult<SendInvitationResponse>> SendInvitation(
+        [FromRoute] Guid bandId,
+        [FromBody] SendInvitationRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
@@ -29,18 +31,23 @@ public class SendInvitationEndpoint: ControllerBase
             return Unauthorized();
         }
 
-        var result = await _validator.ValidateAsync(request);
-        if (!result.IsValid)
+        if (bandId == Guid.Empty)
         {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-            }
+            ModelState.AddModelError(nameof(bandId), "Band ID must not be empty.");
+        }
 
+        var result = await _validator.ValidateAsync(request);
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+        }
+
+        if (!ModelState.IsValid)
+        {
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request, userId);
+        var response = await _handler.HandleAsync(bandId, request, userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

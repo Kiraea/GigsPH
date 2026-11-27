@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Infrastructure;
@@ -12,18 +11,14 @@ namespace PrjA.Features.Conversations.GroupConversation.GetGroupInvitations;
 public class GetGroupInvitationsEndpoint : ControllerBase
 {
     private readonly GetGroupInvitationsHandler _handler;
-    private readonly IValidator<GetGroupInvitationsRequest> _validator;
 
-    public GetGroupInvitationsEndpoint(
-        GetGroupInvitationsHandler handler, IValidator<GetGroupInvitationsRequest> validator)
+    public GetGroupInvitationsEndpoint(GetGroupInvitationsHandler handler)
     {
         _handler = handler;
-        _validator = validator;
     }
 
     [HttpGet("invitations")]
-    public async Task<ActionResult<List<GetGroupInvitationResponse>>> GetGroupInvitations(
-        [FromQuery] GetGroupInvitationsRequest request)
+    public async Task<ActionResult<List<GetGroupInvitationResponse>>> GetGroupInvitations()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
@@ -31,19 +26,7 @@ public class GetGroupInvitationsEndpoint : ControllerBase
             return Unauthorized();
         }
 
-        var result = await _validator.ValidateAsync(request);
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-        }
-
-        if (!ModelState.IsValid)
-        {
-            return ValidationProblem(ModelState);
-        }
-
-        var response = await _handler.HandleAsync(request, userId);
+        var response = await _handler.HandleAsync(userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }
-

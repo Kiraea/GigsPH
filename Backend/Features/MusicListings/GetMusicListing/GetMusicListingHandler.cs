@@ -27,7 +27,7 @@ public class GetMusicListingHandler
                 StartsAt = ml.StartsAt,
                 EndsAt = ml.EndsAt,
                 Description = ml.Description,
-                Genre = ml.Genre == null ? null : new GetGenresResponse()
+                Genre = ml.Genre == null ? null : new GenreDto()
                 {
                     Id = ml.Genre.Id,
                     Name = ml.Genre.Name,

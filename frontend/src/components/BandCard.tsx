@@ -1,28 +1,35 @@
 ﻿import type {
-    BandMember,
     BandMemberInstrument,
     GetMyBandResponse,
 } from '#/queries/bandQueries.tsx'
 import { Crown } from 'lucide-react'
+
 export function BandCard({
     myBand,
     onInvite,
+    onTransferLeadership,
+    onLeave,
+    onPost,
 }: {
     myBand: GetMyBandResponse
     onInvite: (band: GetMyBandResponse) => void
+    onTransferLeadership: (band: GetMyBandResponse) => void
+    onLeave: (band: GetMyBandResponse) => void
+    onPost: (band: GetMyBandResponse) => void
 }) {
     const formatInstrument = (instruments: BandMemberInstrument[]) => {
-        if (instruments.length == 0) return ''
+        if (instruments.length === 0) return ''
 
         // find the main instruments
         const primary = instruments.find((ins) => ins.isMain) ?? instruments[0]
 
-        if (instruments.length == 1) return primary.name
+        if (instruments.length === 1) return primary.name
 
         return `${primary.name} + ${instruments.length - 1}`
     }
 
     const isLeader = myBand.myRole === 'Leader'
+    const hasOtherMembers = myBand.members.length > 1
 
     return (
         <div className="flex flex-col text-foreground-high bg-background-medium p-5 gap-5 rounded-2xl ">
@@ -51,37 +58,45 @@ export function BandCard({
                 <label className="text-2xl font-bold">LineUp</label>
 
                 <div className="flex gap-2">
-                    {myBand.members.map((member, index) => (
+                    {myBand.members.map((member) => (
                         <div key={member.userId}>
                             <div className="flex items-center gap-3">
                                 <div className="relative h-10 w-10 rounded-full bg-purple-300 flex items-center justify-center">
                                     {member.displayName.substring(0, 1)}
-                                    <div className="absolute bottom-1/2 left-6 ">
-                                        <Crown className="fill-pink-400" />
-                                    </div>
+                                    {member.role === 'Leader' && (
+                                        <div className="absolute bottom-1/2 left-6 ">
+                                            <Crown className="fill-pink-400" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-col">
                                     <p className="font-semibold text-lg">
                                         {member.displayName}
                                     </p>
 
-                                    <div className="relative group ">
-                                        <p
-                                            className="bg-background-low text-foreground-high rounded-2xl p-1"
-                                            title={member.instruments
-                                                .map((ins) => ins.name)
-                                                .join(', ')}
-                                        >
-                                            {formatInstrument(
-                                                member.instruments,
-                                            )}
-                                        </p>
-                                        <div className="absolute bottom-full left-full w-max bg-background-medium text-foreground-medium flex-col p-2 gap-5 hidden group-hover:block">
-                                            {member.instruments.map((ins) => (
-                                                <p>{ins.name}</p>
-                                            ))}
+                                    {member.instruments.length > 0 && (
+                                        <div className="relative group ">
+                                            <p
+                                                className="bg-background-low text-foreground-high rounded-2xl p-1"
+                                                title={member.instruments
+                                                    .map((ins) => ins.name)
+                                                    .join(', ')}
+                                            >
+                                                {formatInstrument(
+                                                    member.instruments,
+                                                )}
+                                            </p>
+                                            <div className="absolute bottom-full left-full w-max bg-background-medium text-foreground-medium flex-col p-2 gap-2 hidden group-hover:flex">
+                                                {member.instruments.map(
+                                                    (ins) => (
+                                                        <p key={ins.id}>
+                                                            {ins.name}
+                                                        </p>
+                                                    ),
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -91,18 +106,29 @@ export function BandCard({
 
             <hr className="border-t border-foreground-low" />
 
-            <div className="flex justify-between">
-                <button type="button">Post As Band</button>
-
-                <button
-                    type="button"
-                    disabled={!isLeader}
-                    onClick={() => onInvite(myBand)}
-                >
-                    Invite User
+            <div className="flex justify-between gap-2">
+                <button type="button" onClick={() => onPost(myBand)}>
+                    Post As Band
                 </button>
 
-                <button>Leave</button>
+                {isLeader && (
+                    <button type="button" onClick={() => onInvite(myBand)}>
+                        Invite User
+                    </button>
+                )}
+
+                {isLeader && hasOtherMembers && (
+                    <button
+                        type="button"
+                        onClick={() => onTransferLeadership(myBand)}
+                    >
+                        Transfer Leadership
+                    </button>
+                )}
+
+                <button type="button" onClick={() => onLeave(myBand)}>
+                    Leave
+                </button>
             </div>
         </div>
     )

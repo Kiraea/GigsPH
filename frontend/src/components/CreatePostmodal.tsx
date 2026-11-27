@@ -8,12 +8,17 @@ import {
     getInstrumentOptionsQuery,
 } from '#/queries/OnboardingQueries.ts'
 import { useQuery } from '@tanstack/react-query'
+import { getMyBandsQuery } from '#/queries/bandQueries.tsx'
 
 type CreatePostModalProps = {
     onClose: () => void
+    initialBandId?: string
 }
 
-export function CreatePostmodal(props: CreatePostModalProps) {
+export function CreatePostmodal({
+    onClose,
+    initialBandId,
+}: CreatePostModalProps) {
     const genresQuery = useQuery(getGenresOptionsQuery)
     const instrumentsQuery = useQuery(getInstrumentOptionsQuery)
 
@@ -25,9 +30,13 @@ export function CreatePostmodal(props: CreatePostModalProps) {
         [],
     )
 
+    const bandQuery = useQuery(getMyBandsQuery())
+
+    const bands = bandQuery.data ?? []
+
     const [title, setTitle] = useState<string>('')
     const [description, setDescription] = useState<string>('')
-    const [bandId, setBandId] = useState<string>('')
+    const [bandId, setBandId] = useState<string>(initialBandId ?? '')
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string>('')
@@ -57,10 +66,11 @@ export function CreatePostmodal(props: CreatePostModalProps) {
                 title: title.trim(),
                 description: description.trim(),
                 uploadIds: uploadIds,
+                bandId: bandId || undefined,
                 genreIds: selectedGenreIds,
                 instrumentIds: selectedInstrumentIds,
             })
-            props.onClose()
+            onClose()
         } catch (error) {
             setErrorMessage(getApiErrorMessage(error))
         } finally {
@@ -107,7 +117,7 @@ export function CreatePostmodal(props: CreatePostModalProps) {
         <div
             className="fixed inset-0 z-50 flex  items-center justify-center bg-black/60 p-4"
             onClick={() => {
-                !isSubmitting && props.onClose()
+                !isSubmitting && onClose()
             }}
         >
             <div
@@ -217,6 +227,20 @@ export function CreatePostmodal(props: CreatePostModalProps) {
                         )
                     })}
 
+                    <label>Select a band to post with</label>
+                    <select
+                        value={bandId}
+                        disabled={isSubmitting}
+                        onChange={(e) => setBandId(e.target.value)}
+                    >
+                        <option value="">Personal</option>
+                        {bands.map((band) => (
+                            <option key={band.id} value={band.id}>
+                                {band.name}
+                            </option>
+                        ))}
+                    </select>
+
                     <input
                         type="file"
                         multiple
@@ -252,7 +276,7 @@ export function CreatePostmodal(props: CreatePostModalProps) {
                     <button
                         type="button"
                         disabled={isSubmitting}
-                        onClick={props.onClose}
+                        onClick={onClose}
                         className="text-foreground-low absolute top-5 right-5"
                     >
                         <X />

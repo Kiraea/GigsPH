@@ -15,7 +15,7 @@ public class GetInstrumentsEndpoint : ControllerBase
     }
 
     [HttpGet("instruments")]
-    public async Task<ActionResult<List<GetInstrumentsResponse>>> GetInstruments()
+    public async Task<ActionResult<List<InstrumentDto>>> GetInstruments()
     {
         var response = await _handler.HandleAsync();
 

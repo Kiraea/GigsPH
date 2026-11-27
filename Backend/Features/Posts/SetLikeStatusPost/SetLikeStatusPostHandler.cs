@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PrjA.Common;
 using PrjA.Domain.Entities;
 using PrjA.Infrastructure;
@@ -29,9 +30,50 @@ public class SetLikeStatusPostHandler
                 Type = ErrorType.NotFound,
             });
         }
+        
+        var post =  await _dbContext.Posts.FindAsync(postId);
 
-        // TODO: Check post visibility and set the acting user's like to IsLiked; repeated requests must keep the same state.
-        throw new NotImplementedException();
+        if (post == null)
+        {
+                
+            return Result<SetLikeStatusPostResponse>.Failure(new Error
+            {
+                Code = "Post.NotFound",
+                Message = "Post not found",
+                Type = ErrorType.NotFound,
+            });
+        }
+        
+        var postLike = await  _dbContext.PostLikes.FirstOrDefaultAsync(pl => pl.PostId == postId &&  pl.UserId == userId);
+        
+
+        
+        
+        if (request.IsLiked == true && postLike == null)
+        {
+            _dbContext.PostLikes.Add(new PostLike
+            {
+                PostId = postId,
+                UserId = userId,
+            });
+        }
+
+        if (request.IsLiked == false && postLike != null)
+        {
+            _dbContext.PostLikes.Remove(postLike);   
+        }
+
+
+        
+        await _dbContext.SaveChangesAsync();
+
+        return Result<SetLikeStatusPostResponse>.Success(new SetLikeStatusPostResponse()
+        {
+            isLiked = request.IsLiked,
+            postId = postId,
+        });
+        
+
     }
 }
 

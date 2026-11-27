@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Domain.Entities;
 
-public class PostLikes : ITimestamp
+public class PostLike : ITimestamp
 {
     public Guid PostId { get; set; }
     public Post? Post { get; set; }

@@ -5,6 +5,7 @@ public class GetConversationMessagesResponse
     public Guid ConversationId { get; set; }
 
     public ICollection<MessageDto> Messages { get; set; } = [];
+    public DateTimeOffset? Cursor { get; set; } 
 
 }
 

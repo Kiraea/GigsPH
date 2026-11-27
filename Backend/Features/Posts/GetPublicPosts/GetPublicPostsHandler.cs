@@ -148,12 +148,12 @@ public class GetPublicPostsHandler
                     PublisherName = (sp.BandId != null ? sp.Band?.Name: sp.User?.DisplayName) ?? throw new InvalidOperationException("Post has no publishername"),
                     IsLiked = userId != null ? sp.Likes.Any(l => l.UserId == userId) : false,
                     LikedCount = sp.Likes.Count,
-                    Genres = sp.Genres.Select(g => new GetGenresResponse
+                    Genres = sp.Genres.Select(g => new GenreDto
                     {
                         Id = g.Id,
                         Name = g.Name
                     }).ToList(),
-                    Instruments = sp.Instruments.Select(i => new GetInstrumentsResponse()
+                    Instruments = sp.Instruments.Select(i => new InstrumentDto()
                     {
                         Id = i.Id,
                         Name = i.Name,
@@ -377,12 +377,12 @@ public class GetPublicPostsHandler
                     PublisherName = (sp.BandId != null ? sp.Band?.Name: sp.User?.DisplayName) ?? throw new InvalidOperationException("Post has no publishername"),
                     IsLiked = userId != null ? sp.Likes.Any(l => l.UserId == userId) : false,
                     LikedCount = sp.Likes.Count,
-                    Genres = sp.Genres.Select(g => new GetGenresResponse
+                    Genres = sp.Genres.Select(g => new GenreDto
                     {
                         Id = g.Id,
                         Name = g.Name
                     }).ToList(),
-                    Instruments = sp.Instruments.Select(i => new GetInstrumentsResponse()
+                    Instruments = sp.Instruments.Select(i => new InstrumentDto()
                     {
                         Id = i.Id,
                         Name = i.Name,

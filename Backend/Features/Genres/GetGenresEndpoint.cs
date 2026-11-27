@@ -17,7 +17,7 @@ public class GetGenresEndpoint: ControllerBase
 
     
     [HttpGet("genres")]
-    public async Task<ActionResult<List<GetGenresResponse>>>GetGenres()
+    public async Task<ActionResult<List<GenreDto>>>GetGenres()
     {
         var response = await _handler.HandleAsync();
 

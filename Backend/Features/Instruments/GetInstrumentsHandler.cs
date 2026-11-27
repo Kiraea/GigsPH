@@ -13,13 +13,13 @@ public class GetInstrumentsHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<GetInstrumentsResponse>>> HandleAsync()
+    public async Task<Result<List<InstrumentDto>>> HandleAsync()
     {
         var result = await _dbContext.Instruments.AsNoTracking().ToListAsync();
 
-        return Result<List<GetInstrumentsResponse>>.Success(
+        return Result<List<InstrumentDto>>.Success(
         [
-            .. result.Select((i) => new GetInstrumentsResponse
+            .. result.Select((i) => new InstrumentDto
             {
                 Id = i.Id,
                 Name = i.Name,

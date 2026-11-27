@@ -1,13 +1,14 @@
 ﻿using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Infrastructure;
 
 namespace PrjA.Features.Bands.CreateBand;
 
-
 [ApiController]
-[Route("/api/")]
+[Authorize]
+[Route("/api/bands")]
 public class CreateBandEndpoint : ControllerBase
 {
     private readonly CreateBandEndpointHandler _handler;
@@ -15,16 +16,14 @@ public class CreateBandEndpoint : ControllerBase
     public CreateBandEndpoint(CreateBandEndpointHandler handler, IValidator<CreateBandRequest> validator)
     {
         _handler = handler;
-        _validator =  validator;
+        _validator = validator;
     }
 
-    [HttpPost("create")]
-
-    public async Task<ActionResult<CreateBandResponse>> CreateBand(CreateBandRequest request)
+    [HttpPost]
+    public async Task<ActionResult<CreateBandResponse>> CreateBand([FromBody] CreateBandRequest request)
     {
-        
         var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
             return Unauthorized();
         }
@@ -41,7 +40,5 @@ public class CreateBandEndpoint : ControllerBase
         
         var response = await _handler.HandleAsync(request, userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
-
     }
-    
 }

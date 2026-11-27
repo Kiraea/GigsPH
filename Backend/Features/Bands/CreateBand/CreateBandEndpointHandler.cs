@@ -72,18 +72,8 @@ public class CreateBandEndpointHandler
         {
             Id = band.Id,
             Name = band.Name,
-            description = band.Description
+            description = band.Description,
+            Role = userBand.Role
         });
-
-
-
-
-
-
-
-
-
-
-
     }
 }

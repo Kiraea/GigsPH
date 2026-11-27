@@ -6,7 +6,7 @@ public class Post : ITimestamp
     public required string Title { get; set; }
     public string? Description { get; set; }
 
-    public ICollection<PostLikes> Likes { get; set; } = [];
+    public ICollection<PostLike> Likes { get; set; } = [];
     public ICollection<MediaUpload> MediaUploads { get; set; } = [];
     
     

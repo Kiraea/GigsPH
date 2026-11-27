@@ -22,7 +22,7 @@ public class SendInvitationHandler
         _emailSender = emailSender;
     }
 
-    public async Task<Result<SendInvitationResponse>> HandleAsync(SendInvitationRequest request, string userId)
+    public async Task<Result<SendInvitationResponse>> HandleAsync(Guid bandId, SendInvitationRequest request, string userId)
     {
 
 
@@ -49,7 +49,7 @@ public class SendInvitationHandler
             });
         }
         
-        var band = await _dbContext.Bands.FirstOrDefaultAsync(b => b.Id == request.BandId);
+        var band = await _dbContext.Bands.FirstOrDefaultAsync(b => b.Id == bandId);
 
         if (band == null)
         {
@@ -69,7 +69,7 @@ public class SendInvitationHandler
          
         // check if leader in that specific band
         await _dbContext.Entry(user).Collection(u => u.UserBands).LoadAsync();
-        var userBand= user.UserBands.(b => b.BandId == request.BandId && b.Role == BandRole.Leader);
+        var userBand= user.UserBands.(b => b.BandId == bandId && b.Role == BandRole.Leader);
         if (userBand == null) 
         {
             throw new Exception("Not a leader // not a part of band");
@@ -98,7 +98,7 @@ public class SendInvitationHandler
             });
         }
 
-        var alreadyInvited = await _dbContext.BandInvitations.AnyAsync(bi => bi.BandId == request.BandId &&
+        var alreadyInvited = await _dbContext.BandInvitations.AnyAsync(bi => bi.BandId == bandId &&
                                                                              bi.InvitedToUserId == request.ToId
                                                                              && bi.Status == InvitationStatus.Pending);
         
@@ -113,7 +113,7 @@ public class SendInvitationHandler
         }
           var invitation = new BandInvitation()
         {
-            BandId = request.BandId,
+            BandId = bandId,
             InvitedByUserId = userId,
             InvitedToUserId = request.ToId,
             Status = InvitationStatus.Pending
@@ -126,6 +126,8 @@ public class SendInvitationHandler
 
         
 
+        
+        /*
         var email = new Email() {
             ToEmail = toUser.Email!, // the reason why ! instead of an if check ius because email already has a check inside emailSender eitherway if there wasnt then put if
             ToDisplayName = toUser.DisplayName!,
@@ -136,6 +138,8 @@ public class SendInvitationHandler
  
         
         await _emailSender.BuildMessage(email).SendEmailAsync();
+        
+        */
         return Result<SendInvitationResponse>.Success(new SendInvitationResponse()
         {
             InvitationId = invitation.Id,

@@ -96,7 +96,7 @@ public class OnboardingHandler
         
         foreach (var select in request.SocialLinks)
         {
-           user.SocialLinks.Add(new SocialLink
+           _dbContext.SocialLinks.Add(new SocialLink
            {
                AppUserId = user.Id,
                Platform = select.Platform,
@@ -121,6 +121,7 @@ public class OnboardingHandler
                 City = city,
                 ProvinceState =  provinceState,
             };
+            _dbContext.Locations.Add(location);
         }
 
         user.Location = location;

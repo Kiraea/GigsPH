@@ -6,6 +6,12 @@ public class CreatePostRequest
     
     public required string Title { get; set; }  
     public required string Description { get; set; }  
+    public List<Guid> GenreIds { get; set; } = [];
+    public List<Guid> InstrumentIds { get; set; } = [];
+    
+    
+    
+    
     public Guid? BandId { get; set; }
 }
 

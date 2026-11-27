@@ -17,8 +17,7 @@ public class GetGroupInvitationsHandler
         _userManager = userManager;
     }
 
-    public async Task<Result<List<GetGroupInvitationResponse>>> HandleAsync(
-        GetGroupInvitationsRequest request, string userId)
+    public async Task<Result<List<GetGroupInvitationResponse>>> HandleAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -46,4 +45,3 @@ public class GetGroupInvitationsHandler
         return Result<List<GetGroupInvitationResponse>>.Success(invitations);
     }
 }
-

@@ -25,8 +25,8 @@ public class PostDto
     public bool IsLiked { get; set; }
 
     public ICollection<PostMediaDto> Media { get; set; } = [];
-    public ICollection<GetGenresResponse> Genres { get; set; } = [];
-    public ICollection<GetInstrumentsResponse> Instruments { get; set; } = [];
+    public ICollection<GenreDto> Genres { get; set; } = [];
+    public ICollection<InstrumentDto> Instruments { get; set; } = [];
     public DateTime CreatedAt { get; set; }
 
 }

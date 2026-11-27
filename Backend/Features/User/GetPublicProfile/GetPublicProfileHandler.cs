@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PrjA.Features.User.UpdateProfile;
+using PrjA.Features.Genres;
 using PrjA.Infrastructure;
 using PrjA.Common;
 
@@ -35,28 +35,28 @@ public class GetPublicProfileHandler
 
         return Result<GetPublicProfileResponse>.Success(new GetPublicProfileResponse
         {
-            Firstname = user.FirstName!,
+            FirstName = user.FirstName!,
             LastName = user.LastName!,
-            Description = user.Description!,
+            Description = user.Description,
             DisplayName = user.DisplayName!,
-            Genres = user.Genres.Select(g => new ProfileGenreResponseDto()
+            Genres = user.Genres.Select(g => new GenreDto()
             {
                 Id = g.Id,
                 Name = g.Name,
             }).ToList(),
-            Location = new ProfileLocationResponseDto()
+            Location = new PublicProfileLocationDto()
             {
                 City = user.Location!.City,
                 Country = user.Location.Country,
                 ProvinceState = user.Location.ProvinceState,
             },
-            SocialLinks = user.SocialLinks.Select((s => new ProfileSocialLinkResponseDto
+            SocialLinks = user.SocialLinks.Select(s => new PublicProfileSocialLinkDto
             {
                 Platform = s.Platform,
                 Url = s.Url,
 
-            })).ToList(),
-            UserInstruments = user.UserInstruments.Select(ui => new ProfileInstrumentResponseDto
+            }).ToList(),
+            Instruments = user.UserInstruments.Select(ui => new PublicProfileInstrumentDto
             {
                 IsMain = ui.isMain,
                 Name = ui.Instrument!.Name,

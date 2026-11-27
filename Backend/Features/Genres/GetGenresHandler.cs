@@ -13,15 +13,15 @@ public class GetGenresHandler
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<GetGenresResponse>>> HandleAsync()
+    public async Task<Result<List<GenreDto>>> HandleAsync()
     {
         
         var result = await _dbContext.Genres.AsNoTracking().ToListAsync();
 
 
-        return Result<List<GetGenresResponse>>.Success(
+        return Result<List<GenreDto>>.Success(
         [
-            .. result.Select((g) => new GetGenresResponse
+            .. result.Select((g) => new GenreDto
             {
                 Id = g.Id,
                 Name = g.Name,

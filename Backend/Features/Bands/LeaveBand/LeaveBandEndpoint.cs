@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrjA.Infrastructure;
@@ -12,16 +11,14 @@ namespace PrjA.Features.Bands.LeaveBand;
 public class LeaveBandEndpoint : ControllerBase
 {
     private readonly LeaveBandHandler _handler;
-    private readonly IValidator<LeaveBandRequest> _validator;
 
-    public LeaveBandEndpoint(LeaveBandHandler handler, IValidator<LeaveBandRequest> validator)
+    public LeaveBandEndpoint(LeaveBandHandler handler)
     {
         _handler = handler;
-        _validator = validator;
     }
 
-    [HttpPost("leave")]
-    public async Task<ActionResult<LeaveBandResponse>> LeaveBand([FromBody] LeaveBandRequest request)
+    [HttpPost("{bandId:guid}/leave")]
+    public async Task<ActionResult<LeaveBandResponse>> LeaveBand([FromRoute] Guid bandId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
@@ -29,18 +26,13 @@ public class LeaveBandEndpoint : ControllerBase
             return Unauthorized();
         }
 
-        var result = await _validator.ValidateAsync(request);
-        if (!result.IsValid)
+        if (bandId == Guid.Empty)
         {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-            }
-
+            ModelState.AddModelError(nameof(bandId), "Band ID must not be empty.");
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(request, userId);
+        var response = await _handler.HandleAsync(bandId, userId);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }

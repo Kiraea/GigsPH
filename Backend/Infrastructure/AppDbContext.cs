@@ -54,6 +54,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Conversation> Conversations { get; set; }
     public DbSet<ConversationMember> ConversationMembers { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<PostLike> PostLikes { get; set; }
     public DbSet<GroupChatInvitation> GroupChatInvitations{ get; set; }
 
     

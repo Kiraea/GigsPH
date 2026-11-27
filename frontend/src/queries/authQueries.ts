@@ -1,6 +1,6 @@
 ﻿import { axiosInstance } from '#/axiosInstance.tsx'
-import { useMutation } from '@tanstack/react-query'
-import axios, { type AxiosError } from 'axios'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 export type RegisterRequest = {
     email: string
     password: string
@@ -46,8 +46,12 @@ async function login(request: LoginRequest): Promise<LoginResponse> {
 }
 
 export function useLogin() {
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: login,
+        onSuccess: () => {
+            queryClient.clear()
+        },
     })
 }
 

@@ -4,9 +4,9 @@ using PrjA.Domain.Entities;
 
 namespace PrjA.Infrastructure.Configurations;
 
-public class PostLikesConfiguration : IEntityTypeConfiguration<PostLikes>
+public class PostLikesConfiguration : IEntityTypeConfiguration<PostLike>
 {
-    public void Configure(EntityTypeBuilder<PostLikes> builder)
+    public void Configure(EntityTypeBuilder<PostLike> builder)
     {
         builder.HasKey(x => new { x.PostId, x.UserId });
         

@@ -37,7 +37,7 @@ public class UploadHandler
         {
             (UploadPurpose.Profile or UploadPurpose.Post, "image/jpg" or "image/jpeg" or "image/png") =>
                 5L * 1024 * 1024,
-            (UploadPurpose.Post, "audio/mp3" or "audio/wav") => 50L * 1024 * 1024,
+            (UploadPurpose.Post, "audio/mp3" or "audio/wav" or "audio/mpeg") => 50L * 1024 * 1024,
             (UploadPurpose.Post, "video/mp4") => 100L * 1024 * 1024,
             _ => 0
         };

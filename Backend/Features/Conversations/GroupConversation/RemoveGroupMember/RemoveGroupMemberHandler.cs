@@ -19,7 +19,7 @@ public class RemoveGroupMemberHandler
     }
 
     public async Task<Result<RemoveGroupMemberResponse>> HandleAsync(
-        RemoveGroupMemberRequest request, string userId)
+        Guid conversationId, string memberUserId, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -33,7 +33,7 @@ public class RemoveGroupMemberHandler
         }
 
 
-        if (request.MemberUserId == user.Id)
+        if (memberUserId == user.Id)
         {
             
             return Result<RemoveGroupMemberResponse>.Failure(new Error
@@ -45,7 +45,7 @@ public class RemoveGroupMemberHandler
         }
 
         var hasPermission = await _dbContext.ConversationMembers.AnyAsync(cm =>
-            cm.ConversationId == request.ConversationId && cm.Conversation.OwnerUserId == userId &&
+            cm.ConversationId == conversationId && cm.Conversation.OwnerUserId == userId &&
             cm.UserId == userId && cm.Conversation.Type == ConversationType.Group);
 
         if (!hasPermission)
@@ -60,7 +60,7 @@ public class RemoveGroupMemberHandler
         }
 
         var conversationMember =
-            await _dbContext.ConversationMembers.FirstOrDefaultAsync(cm => request.MemberUserId == cm.UserId && request.ConversationId == cm.ConversationId);
+            await _dbContext.ConversationMembers.FirstOrDefaultAsync(cm => memberUserId == cm.UserId && conversationId == cm.ConversationId);
         if (conversationMember == null)
         {
             return Result<RemoveGroupMemberResponse>.Failure(new Error
@@ -83,4 +83,3 @@ public class RemoveGroupMemberHandler
 
     }
 }
-

@@ -4,9 +4,9 @@ public class Location : ITimestamp
 {
 
     public Guid Id { get; set; } = Guid.CreateVersion7();
-    public string Country { get; set; }
-    public string ProvinceState { get; set; }
-    public string City { get; set; }
+    public required string Country { get; set; }
+    public required string ProvinceState { get; set; }
+    public required string City { get; set; }
     
     
     public double? latitude { get; set; }

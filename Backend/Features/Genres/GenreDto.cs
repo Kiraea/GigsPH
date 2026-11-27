@@ -1,6 +1,6 @@
 ﻿namespace PrjA.Features.Genres;
 
-public class GetGenresResponse
+public class GenreDto
 {
     
     public required string Name { get; set; }

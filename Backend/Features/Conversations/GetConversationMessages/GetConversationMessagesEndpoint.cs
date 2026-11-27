@@ -12,18 +12,16 @@ namespace PrjA.Features.Conversations.GetConversationMessages;
 public class GetConversationMessagesEndpoint : ControllerBase
 {
     private readonly GetConversationMessagesHandler _handler;
-    private readonly IValidator<GetConversationMessagesRequest> _validator;
 
     public GetConversationMessagesEndpoint(
-        GetConversationMessagesHandler handler, IValidator<GetConversationMessagesRequest> validator)
+        GetConversationMessagesHandler handler )
     {
         _handler = handler;
-        _validator = validator;
     }
 
     [HttpGet("{conversationId:guid}/messages")]
     public async Task<ActionResult<GetConversationMessagesResponse>> GetConversationMessages(
-        [FromRoute] Guid conversationId, [FromQuery] GetConversationMessagesRequest request)
+        [FromRoute] Guid conversationId, [FromQuery] DateTimeOffset? cursor)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
@@ -34,20 +32,11 @@ public class GetConversationMessagesEndpoint : ControllerBase
         if (conversationId == Guid.Empty)
         {
             ModelState.AddModelError(nameof(conversationId), "Conversation ID must not be empty.");
-        }
-
-        var result = await _validator.ValidateAsync(request);
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-        }
-
-        if (!ModelState.IsValid)
-        {
+            
             return ValidationProblem(ModelState);
         }
 
-        var response = await _handler.HandleAsync(conversationId, request, userId);
+        var response = await _handler.HandleAsync(conversationId ,userId, cursor);
         return response.isSuccess ? Ok(response.Value) : response.ToProblemDetails(this);
     }
 }
