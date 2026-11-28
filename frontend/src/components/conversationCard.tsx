@@ -1,27 +1,30 @@
-﻿import type { ConversationResponse } from '#/routes/_app/conversations.tsx'
-import {
-    ConvertDateTimeToReadable,
-    ConvertDateTimeToReadableSummary,
-} from '#/utils/generalUtils.ts'
+﻿import type { GetConversationResponse } from '#/queries/conversationQueries.tsx'
+import { ConvertDateTimeToReadableSummary } from '#/utils/generalUtils.ts'
+import { Link } from '@tanstack/react-router'
 
 export function ConversationCard({
     conversation,
 }: {
-    conversation: ConversationResponse
+    conversation: GetConversationResponse
 }) {
     return (
-        <div className="flex justify-between ">
+        <Link
+            className="flex justify-between "
+            to="/conversations/$conversationId"
+            params={{ conversationId: conversation.conversationId }}
+            activeProps={{ className: 'bg-background-medium' }}
+        >
             <div className="flex-col flex-1 flex min-w-0">
-                <label className="truncate font-bold text-md">
+                <p className="truncate font-bold text-md">
                     {conversation.conversationName}
-                </label>
+                </p>
 
                 {conversation.latestSender != null &&
                     conversation.latestMessage != null && (
-                        <label className="truncate font-bold text-sm">
+                        <p className="truncate font-bold text-sm">
                             {conversation.latestSender}:{' '}
                             {conversation.latestMessage}
-                        </label>
+                        </p>
                     )}
             </div>
 
@@ -34,7 +37,7 @@ export function ConversationCard({
                     </time>
                 )}
             </div>
-        </div>
+        </Link>
     )
 }
 // shgrink-0 dont steal width from me its locked

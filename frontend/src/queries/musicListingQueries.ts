@@ -165,7 +165,10 @@ export const getMusicListingsQuery = async ({
     pageSize: number
 }) => {
     return queryOptions({
-        queryKey: ['music-listings'],
+        queryKey: [
+            'music-listings',
+            { genreId, instrumentId, city, startsAfter, page },
+        ],
         queryFn: () =>
             getMusicListings({
                 genreId,

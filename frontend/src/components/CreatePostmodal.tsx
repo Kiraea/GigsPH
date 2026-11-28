@@ -9,6 +9,7 @@ import {
 } from '#/queries/OnboardingQueries.ts'
 import { useQuery } from '@tanstack/react-query'
 import { getMyBandsQuery } from '#/queries/bandQueries.tsx'
+import { Modal } from '#/components/Modal.tsx'
 
 type CreatePostModalProps = {
     onClose: () => void
@@ -114,181 +115,167 @@ export function CreatePostmodal({
     }
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex  items-center justify-center bg-black/60 p-4"
-            onClick={() => {
-                !isSubmitting && onClose()
-            }}
+        <Modal
+            onClose={onClose}
+            closeDisabled={isSubmitting}
+            className="max-w-lg bg-background-medium"
         >
-            <div
-                className="relative w-full max-w-lg rounded-2xl bg-background-medium p-6 shadow-lg"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <form onSubmit={handleSubmit} className="flex flex-col gap-3 ">
-                    <label>Title</label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 ">
+                <label>Title</label>
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
 
-                    <label>Description</label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Enter description..."
-                        className="bg-background-high text-foreground-high"
-                    />
+                <label>Description</label>
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter description..."
+                    className="bg-background-high text-foreground-high"
+                />
 
-                    <label>Genres</label>
+                <label>Genres</label>
 
-                    <select
-                        value=""
-                        disabled={isSubmitting}
-                        onChange={(e) => handleAddGenre(e.target.value)}
-                    >
-                        <option disabled value="">
-                            Add a genre...
-                        </option>
-                        {genresOptions
-                            .filter(
-                                (go, i) => !selectedGenreIds.includes(go.id),
+                <select
+                    value=""
+                    disabled={isSubmitting}
+                    onChange={(e) => handleAddGenre(e.target.value)}
+                >
+                    <option disabled value="">
+                        Add a genre...
+                    </option>
+                    {genresOptions
+                        .filter((go, i) => !selectedGenreIds.includes(go.id))
+                        .map((go, i) => {
+                            return (
+                                <option key={go.id} value={go.id}>
+                                    {go.name}
+                                </option>
                             )
-                            .map((go, i) => {
-                                return (
-                                    <option key={go.id} value={go.id}>
-                                        {go.name}
-                                    </option>
-                                )
-                            })}
-                    </select>
+                        })}
+                </select>
 
-                    {selectedGenreIds.map((genreId, i) => {
-                        const genre = genresOptions.find(
-                            (genre) => genre.id === genreId,
+                {selectedGenreIds.map((genreId, i) => {
+                    const genre = genresOptions.find(
+                        (genre) => genre.id === genreId,
+                    )
+
+                    return (
+                        <div key={genreId} className="flex">
+                            <p> {genre?.name} </p>
+                            <button
+                                disabled={isSubmitting}
+                                type="button"
+                                onClick={() => handleRemoveGenre(genreId)}
+                            >
+                                <X />
+                            </button>
+                        </div>
+                    )
+                })}
+
+                <label>Instruments</label>
+                <select
+                    disabled={isSubmitting}
+                    onChange={(e) => handleAddInstrument(e.target.value)}
+                    value=""
+                >
+                    <option disabled value="">
+                        Select an instrument
+                    </option>
+                    {instrumentsOptions
+                        .filter(
+                            (ins, i) => !selectedInstrumentIds.includes(ins.id),
                         )
+                        .map((ins, i) => (
+                            <option key={`options-${ins.id}`} value={ins.id}>
+                                {' '}
+                                {ins.name}
+                            </option>
+                        ))}
+                </select>
 
-                        return (
-                            <div key={genreId} className="flex">
-                                <p> {genre?.name} </p>
+                {selectedInstrumentIds.map((insId, i) => {
+                    const instrument = instrumentsOptions.find(
+                        (inso, o) => inso.id === insId,
+                    )
+                    return (
+                        <div key={insId} className="flex">
+                            <p>{instrument?.name}</p>
+                            <button
+                                disabled={isSubmitting}
+                                type="button"
+                                onClick={(e) => handleRemoveInstrument(insId)}
+                            >
+                                <X></X>
+                            </button>
+                        </div>
+                    )
+                })}
+
+                <label>Select a band to post with</label>
+                <select
+                    value={bandId}
+                    disabled={isSubmitting}
+                    onChange={(e) => setBandId(e.target.value)}
+                >
+                    <option value="">Personal</option>
+                    {bands.map((band) => (
+                        <option key={band.id} value={band.id}>
+                            {band.name}
+                        </option>
+                    ))}
+                </select>
+
+                <input
+                    type="file"
+                    multiple
+                    disabled={isSubmitting}
+                    accept="image/jpeg,image/png,audio/mpeg,audio/wav,video/mp4"
+                    onChange={handleFileChange}
+                />
+
+                {files.length > 0 && (
+                    <ul className="flex flex-col">
+                        {files.map((file, i) => (
+                            <li key={i} className="flex gap-2">
+                                <span>{file.name}</span>
                                 <button
-                                    disabled={isSubmitting}
                                     type="button"
-                                    onClick={() => handleRemoveGenre(genreId)}
+                                    onClick={() => {
+                                        if (!isSubmitting) {
+                                            handleRemoveFile(i)
+                                        }
+                                    }}
                                 >
                                     <X />
                                 </button>
-                            </div>
-                        )
-                    })}
-
-                    <label>Instruments</label>
-                    <select
-                        disabled={isSubmitting}
-                        onChange={(e) => handleAddInstrument(e.target.value)}
-                        value=""
-                    >
-                        <option disabled value="">
-                            Select an instrument
-                        </option>
-                        {instrumentsOptions
-                            .filter(
-                                (ins, i) =>
-                                    !selectedInstrumentIds.includes(ins.id),
-                            )
-                            .map((ins, i) => (
-                                <option
-                                    key={`options-${ins.id}`}
-                                    value={ins.id}
-                                >
-                                    {' '}
-                                    {ins.name}
-                                </option>
-                            ))}
-                    </select>
-
-                    {selectedInstrumentIds.map((insId, i) => {
-                        const instrument = instrumentsOptions.find(
-                            (inso, o) => inso.id === insId,
-                        )
-                        return (
-                            <div key={insId} className="flex">
-                                <p>{instrument?.name}</p>
-                                <button
-                                    disabled={isSubmitting}
-                                    type="button"
-                                    onClick={(e) =>
-                                        handleRemoveInstrument(insId)
-                                    }
-                                >
-                                    <X></X>
-                                </button>
-                            </div>
-                        )
-                    })}
-
-                    <label>Select a band to post with</label>
-                    <select
-                        value={bandId}
-                        disabled={isSubmitting}
-                        onChange={(e) => setBandId(e.target.value)}
-                    >
-                        <option value="">Personal</option>
-                        {bands.map((band) => (
-                            <option key={band.id} value={band.id}>
-                                {band.name}
-                            </option>
+                            </li>
                         ))}
-                    </select>
+                    </ul>
+                )}
 
-                    <input
-                        type="file"
-                        multiple
-                        disabled={isSubmitting}
-                        accept="image/jpeg,image/png,audio/mpeg,audio/wav,video/mp4"
-                        onChange={handleFileChange}
-                    />
+                {errorMessage && (
+                    <p className="text-sm text-red-500">{errorMessage}</p>
+                )}
 
-                    {files.length > 0 && (
-                        <ul className="flex flex-col">
-                            {files.map((file, i) => (
-                                <li key={i} className="flex gap-2">
-                                    <span>{file.name}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            if (!isSubmitting) {
-                                                handleRemoveFile(i)
-                                            }
-                                        }}
-                                    >
-                                        <X />
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-
-                    {errorMessage && (
-                        <p className="text-sm text-red-500">{errorMessage}</p>
-                    )}
-
-                    <button
-                        type="button"
-                        disabled={isSubmitting}
-                        onClick={onClose}
-                        className="text-foreground-low absolute top-5 right-5"
-                    >
-                        <X />
-                    </button>
-                    <button
-                        disabled={isSubmitting || !title.trim()}
-                        type="submit"
-                    >
-                        {isSubmitting ? 'Posting' : 'Post'}
-                    </button>
-                </form>
-            </div>
-        </div>
+                <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={onClose}
+                    className="text-foreground-low absolute top-5 right-5"
+                >
+                    <X />
+                </button>
+                <button
+                    disabled={isSubmitting || !title.trim()}
+                    type="submit"
+                >
+                    {isSubmitting ? 'Posting' : 'Post'}
+                </button>
+            </form>
+        </Modal>
     )
 }

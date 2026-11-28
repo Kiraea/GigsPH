@@ -1,5 +1,5 @@
 ﻿import { type PostResponse, useUpdateLike } from '#/queries/postQueries.ts'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ConvertDateTimeToReadable } from '#/utils/generalUtils.ts'
 import {
     ChevronLeft,
@@ -17,6 +17,28 @@ export function PostCard({ post }: { post: PostResponse }) {
 
     const updateLike = useUpdateLike()
 
+    const cardRef = useRef<HTMLElement | null>(null)
+
+    useEffect(() => {
+        const element = cardRef.current
+
+        const observer = new IntersectionObserver((entries) => {
+            const entry = entries[0]
+            if (entry.isIntersecting) {
+                if (cardRef.current != null) {
+                    return
+                }
+            }
+        })
+        if (element == null) {
+            return
+        }
+        observer.observe(element)
+        return () => observer.disconnect()
+    }, [])
+
+    const ObserverCallback = () => {}
+
     console.log(post)
 
     const handleLike = () => {
@@ -27,7 +49,10 @@ export function PostCard({ post }: { post: PostResponse }) {
     }
 
     return (
-        <article className="flex flex-col rounded-2xl bg-background-medium shadow-sm">
+        <article
+            ref={cardRef}
+            className="flex flex-col rounded-2xl bg-background-medium shadow-sm"
+        >
             <div className="flex flex-col gap-5 p-5">
                 <header className="flex gap-2 items-center">
                     <div>

@@ -32,11 +32,16 @@ public class GetConversationsHandler
         }
 
         // list of conversation of user
-        var conversationMembers = await _dbContext.ConversationMembers.AsNoTracking().Where(cm => cm.UserId == userId).Include(cm => cm.Conversation)
-            .ThenInclude(cm => cm.ConversationMembers).ThenInclude(cm2 => cm2.User).Include(cm => cm.Conversation)
-            .ThenInclude(c => c.Messages
-                .OrderByDescending(m => m.CreatedAt).ThenByDescending(m => m.Id)
-                .Take(1)).ThenInclude(m => m.SenderUser).ToListAsync();
+        var conversations = await _dbContext.Conversations.AsNoTracking()
+            .Where(c => c.ConversationMembers.Any(cm => cm.UserId == userId))
+            .Include(c => c.ConversationMembers).ThenInclude(cm => cm.User)
+            .Include(c => c.Messages
+                .OrderByDescending(m => m.CreatedAt)
+                .ThenByDescending(m => m.Id).Take(1))
+            .ThenInclude(m => m.SenderUser)
+            .ToListAsync();
+        
+        
             
         
         
@@ -52,44 +57,28 @@ public class GetConversationsHandler
             .Where(b => b.BlockedUserId == userId || b.BlockerUserId == userId)
             .Select(b => b.BlockedUserId == userId ? b.BlockerUserId : b.BlockedUserId).ToListAsync();
 
-        var conversations = conversationMembers.Select(cm =>
+
+
+        var getConversationResponses= conversations.Select(c => new GetConversationResponse
         {
-            if (cm.Conversation == null)
-            {
-                throw new InvalidOperationException(
-                    "Membership has no conversation.");
-            }
+            ConversationName = c.Type == ConversationType.Direct
+                ? c.ConversationMembers.FirstOrDefault(cm => cm.UserId != userId)?.User?.DisplayName ?? "Unknown User"
+                : c.Name ?? "Unknown Group",
+            ConversationType = c.Type,
+            DirectRequestStatus = c.DirectRequestStatus,
+            ConversationId = c.Id,
 
- 
+            CanAcceptRequest = c.InitiatedByUserId != userId && c.DirectRequestStatus == DirectRequestStatus.Pending && c.InitiatedByUserId != null && !c.ConversationMembers.Any(cm => blockedUserIds.Contains(cm.UserId)),
+            LatestMessage = c.Messages.FirstOrDefault()?.Text,
+            LatestDate = c.Messages.FirstOrDefault()?.CreatedAt,
+            LatestSender = c.Messages.FirstOrDefault()?.SenderUser?.DisplayName,
+        }).OrderByDescending(c => c.LatestDate).ThenByDescending(c => c.ConversationId).ToList();
+        
 
-
-            return new GetConversationResponse()
-            {
-                ConversationId = cm.Conversation.Id,
-                ConversationType = cm.Conversation.Type,
-                DirectRequestStatus = cm.Conversation.DirectRequestStatus,
-
-                ConversationName = cm.Conversation.Type == ConversationType.Direct
-                    ? cm.Conversation.ConversationMembers.Where(cm2 =>
-                            cm2.ConversationId == cm.ConversationId && cm2.UserId != userId)
-                        .Select(cm2 => cm2.User == null ? null : cm2.User.DisplayName).FirstOrDefault() ?? "UnknownUser"
-                    : cm.Conversation.Name ?? "Group Chat",
-                CanAcceptRequest = cm.Conversation.Type == ConversationType.Direct &&
-                                   cm.Conversation.DirectRequestStatus == DirectRequestStatus.Pending &&
-                                   cm.Conversation.InitiatedByUserId != userId && cm.Conversation.InitiatedByUserId != null && !cm.Conversation.ConversationMembers
-                                       .Any(m => blockedUserIds.Contains(m.UserId)) ,
-                
-                LatestDate =  cm.Conversation.Messages.Select(m => (DateTime?)m.CreatedAt).FirstOrDefault(),
-                LatestMessage=  cm.Conversation.Messages.Select(m => m.Text).FirstOrDefault(),
-                LatestSender=  cm.Conversation.Messages.Select(m => m.SenderUser?.DisplayName ).FirstOrDefault(),
-
-            };
-
-        }).OrderByDescending(c => c.LatestDate).ThenBy(c => c.ConversationId).ToList();
-      
+       
         var response = new GetConversationsResponse
         {
-            Conversations = conversations,
+            Conversations = getConversationResponses,
         };
 
         return Result<GetConversationsResponse>.Success(response);
